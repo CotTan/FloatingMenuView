@@ -32,12 +32,15 @@ public class FloatingMenuAdapter extends BaseMultiItemQuickAdapter<FloatingMenuB
 
         LinearLayoutCompat layoutCompat = helper.getView(R.id.ll_floating_menu_item);
         if (item.isHasLine()) {
-            //第二次后，加载之前清除上次加载的数据
+            //第二次后，加载之前清除上次加载的数据,考虑到需要更改颜色和高度，不然直接跳过
             if (layoutCompat.getChildCount() > 1) layoutCompat.removeViewAt(1);
             //添加分割线
             if (helper.getAdapterPosition() >= 0
                     && helper.getAdapterPosition() < getData().size() - 1)
-                layoutCompat.addView(createView(getContext(), item.getLineColor(), item.getLineHeight()));
+                layoutCompat.addView(createView(getContext(), item.getLineColor(), item.getLineHeight(), false));
+//            else
+//                //不添加可能会对不齐
+//                layoutCompat.addView(createView(getContext(), item.getLineColor(), item.getLineHeight(), true));
         }
 
         // 根据返回的 type 分别设置数据
@@ -75,12 +78,12 @@ public class FloatingMenuAdapter extends BaseMultiItemQuickAdapter<FloatingMenuB
     /**
      * 创建 LinearLayout 的子布局
      */
-    public View createView(Context context, int backgroundColor, int height) {
+    public View createView(Context context, int backgroundColor, int height, boolean isEmpty) {
 
         LinearLayoutCompat.LayoutParams llp = new LinearLayoutCompat.LayoutParams(
-                LinearLayoutCompat.LayoutParams.MATCH_PARENT, Math.max(height, 0));
+                LinearLayoutCompat.LayoutParams.MATCH_PARENT, Math.max(isEmpty ? 0 : height, 0));
 
-        llp.height = Math.max(height, 0);
+        llp.height = Math.max(isEmpty ? 0 : height, 0);
         llp.leftMargin = ConvertUtils.dp2px(6);
         llp.rightMargin = ConvertUtils.dp2px(6);
 

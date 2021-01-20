@@ -28,7 +28,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_floating_menu_view"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:background="@drawable/shape_solid_bg_blue_10"
@@ -38,4 +38,5 @@
             app:layout_constraintEnd_toEndOf="@id/iv_floating_menu_floating"
             app:layout_constraintStart_toStartOf="@id/iv_floating_menu_floating" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </merge>
