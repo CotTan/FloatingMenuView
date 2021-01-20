@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">FloatingMenuView</string>
+
+    <string name="again_exit">再按一次退出FloatingMenuView</string>
+    <string name="maintenance" translatable="false">System Maintenance</string>
+
+    <string name="current_version">当前版本\u3000V</string>
+    <string name="latest_version">当前已是最新版本</string>
+    <string name="update_new_version">更新版本至</string>
+    <string name="download">立即更新</string>
+    <string name="downloading">正在下载</string>
+    <string name="please_wait">请稍后…</string>
+    <string name="download_complete">下载完成</string>
+    <string name="download_complete_install">是否安装</string>
+    <string name="download_error">下载失败!</string>
+
+    <!--通用-->
+    <string name="cancel">取消</string>
+    <string name="confirm">确定</string>
+    <string name="temp_save">暂存</string>
+    <string name="submit">提交</string>
+    <string name="save">保存</string>
+    <string name="top">顶部</string>
+    <string name="close">关闭</string>
+    <string name="delete">删除</string>
+    <string name="select_all">全选</string>
+    <string name="unselect_all">取消全选</string>
+    <string name="reverse_select">反选</string>
+    <string name="download_later">以后再说</string>
+    <string name="update_now">立即更新</string>
+    <string name="download_now">马上下载</string>
+    <string name="whether_download">是否下载 %s.apk 到手机上</string>
+    <string name="already_latest_version">已经是最新版本</string>
+    <string name="has_latest_version">发现新版本</string>
+    <string name="bind">绑定</string>
+    <string name="unbind">解绑</string>
+    <string name="unbind_space">解&#160;\t&#160;\t绑</string>
+    <string name="bind_space">绑&#160;\t&#160;\t定</string>
+    <string name="tips">温馨提示</string>
+    <string name="not_open">该功能暂未开放</string>
+    <string name="no">否</string>
+    <string name="yes">是</string>
+    <string name="to">至</string>
+    <string name="go_away">离开</string>
+    <string name="stay">留下</string>
+    <string name="go_back">退回</string>
+    <string name="reset">重置</string>
+    <string name="start_time">开始时间</string>
+    <string name="end_time">结束时间</string>
+    <string name="start_date">开始日期</string>
+    <string name="end_date">结束日期</string>
+    <string name="zero">0</string>
+    <string name="save_success">保存成功！</string>
+    <string name="save_fail">保存失败，请检查网络重试！</string>
+    <string name="delete_success">删除成功！</string>
+    <string name="delete_fail">删除失败，请检查网络重试！</string>
+    <string name="save_pic">保存图片</string>
+    <string name="image_desc">图片</string>
+    <string name="remark">备注</string>
+
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tb_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:background="?attr/colorPrimaryDark"
+    android:minHeight="48dp"
+    app:contentInsetStartWithNavigation="0dp"
+    app:navigationIcon="@drawable/icon_back"
+    app:titleTextAppearance="@style/Toolbar.TitleText">
+
+    <TextView
+        android:id="@+id/tv_toolbar_center_title"
+        style="@style/Toolbar.TitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxWidth="220dp"
+        android:singleLine="true" />
+
+    <TextView
+        android:id="@+id/tv_toolbar_right_text"
+        style="@style/Toolbar.TitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:gravity="center"
+        android:minWidth="56dp"
+        android:paddingStart="@dimen/dp_4"
+        android:paddingEnd="@dimen/dp_4"
+        android:singleLine="true"
+        android:textSize="14sp"
+        tools:ignore="UnusedAttribute" />
+</androidx.appcompat.widget.Toolbar>

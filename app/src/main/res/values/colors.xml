@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <!--gray-->
+    <color name="gray">#9E9E9E</color>
+    <color name="textGray">#757575</color>
+    <color name="textColor">#595757</color>
+    <color name="textBlack">#424242</color>
+    <color name="grayBackground">#B5B5B6</color>
+    <color name="backgroundTransparent">#70000000</color>
+    <color name="transparent">#00000000</color>
+
+    <!--yellow-->
+    <color name="lightYellow">#fff555</color>
+    <color name="yellow">#fadb14</color>
+    <color name="darkYellow">#ffcb00</color>
+    <color name="gold">#faad14</color>
+    <color name="orange">#ffa940</color>
+
+    <!--white-->
+    <color name="grayWhite">#f0f0f0</color>
+    <color name="white">#FFFFFF</color>
+    <color name="lineColor">#E9E9E9</color>
+    <color name="backgroundColor">#fafafa</color>
+    <color name="textBackgroundColor">#EBECED</color>
+
+    <!--red-->
+    <color name="volcano">#fa541c</color>
+    <color name="red">#f5222d</color>
+
+    <!--green-->
+    <color name="textGreen">#52c41a</color>
+
+    <!--blue-->
+    <color name="blue">#2f54eb</color>
+    <color name="selectBlue">#1d39c4</color>
+    <color name="unSelectLightBlue">#6595ff</color>
+    <color name="blue_gradient_dark">#1d39c4</color>
+    <color name="blue_gradient_light">#597ef7</color>
+</resources>
