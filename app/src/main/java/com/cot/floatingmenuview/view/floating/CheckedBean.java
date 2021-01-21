@@ -1,6 +1,9 @@
 package com.cot.floatingmenuview.view.floating;
 
-public class BeanChecked {
+/**
+ * 是否被选中
+ */
+public class CheckedBean {
     boolean isChecked = false;
 
     public boolean isChecked() {

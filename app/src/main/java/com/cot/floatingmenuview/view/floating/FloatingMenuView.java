@@ -379,9 +379,9 @@ public class FloatingMenuView extends FrameLayout {
      *              2 取消全选
      *              3 反选
      */
-    public FloatingMenuView setCheck(int check, List<? extends BeanChecked> list) {
+    public FloatingMenuView setCheck(int check, List<? extends CheckedBean> list) {
         if (list != null) {
-            for (BeanChecked bean : list) {
+            for (CheckedBean bean : list) {
                 switch (check) {
                     case 1://全选
                         bean.setChecked(true);
