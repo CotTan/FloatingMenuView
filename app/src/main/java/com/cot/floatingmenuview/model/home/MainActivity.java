@@ -84,13 +84,13 @@ public class MainActivity extends BaseActivity {
                 .setMargin(0, 10, 10, 20)
                 .setMenuBackground(R.drawable.shape_solid_bg_blue_10)
                 .setDividingLineColor(getResources().getColor(R.color.white))
-                .setOnClickListener((FloatingMenuView.OnClickListener) v -> {
-                    ToastUtils.showShort("单击 - 悬浮按钮");
+                .setOnClickListener(() -> {
+                ToastUtils.showShort("单击 - 悬浮按钮");
                 })
-                .setOnLongClickListener((FloatingMenuView.OnLongClickListener) v -> {
-                    ToastUtils.showShort("长按 - 悬浮按钮");
-                    return true;
-                })
+//                .setOnLongClickListener((FloatingMenuView.OnLongClickListener) v -> {
+//                    ToastUtils.showShort("长按 - 悬浮按钮");
+//                    return false;
+//                })
                 .setOnItemClickListener((adapter, view, position) -> {
                     switch (position) {
                         case 0:

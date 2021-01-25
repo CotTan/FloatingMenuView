@@ -2,6 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.cot.floatingmenuview">
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:name=".base.App"
         android:allowBackup="true"

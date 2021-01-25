@@ -1,10 +1,17 @@
 package com.cot.floatingmenuview.view.floating;
 
+import android.annotation.SuppressLint;
+import android.app.Service;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -16,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.blankj.utilcode.util.ConvertUtils;
+import com.blankj.utilcode.util.SizeUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.cot.floatingmenuview.R;
 import com.cot.floatingmenuview.view.RecycleViewGridDivider;
@@ -35,6 +43,7 @@ import java.util.regex.Pattern;
  * 目前不限制按钮组的个数，但是建议数量在10以下
  */
 public class FloatingMenuView extends FrameLayout {
+    private String TAG = "FloatingMenuView";
     private Context mContext;
     private View views;
     private ConstraintLayout mLayout;
@@ -44,6 +53,11 @@ public class FloatingMenuView extends FrameLayout {
     private List<FloatingMenuBean> floatingMenuList;
     private FloatingMenuAdapter floatingAdapter;
     private List<String> labelList;//用来存按钮组中的文字
+
+    private boolean isLongPress = false;//是否长按 悬浮按钮
+    private int startX, startY;//控件长按的位置
+    private int marginBottom = 0;
+    private GestureDetector mGestureDetector;
 
     //悬浮按钮
     private OnClickListener onClickListener;
@@ -69,6 +83,7 @@ public class FloatingMenuView extends FrameLayout {
         initView();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initView() {
         labelList = new ArrayList<>();
 
@@ -78,16 +93,198 @@ public class FloatingMenuView extends FrameLayout {
         mRecyclerView = views.findViewById(R.id.rv_floating_menu_view);
         mIvFloating = views.findViewById(R.id.iv_floating_menu_floating);
 
-        mIvFloating.setOnClickListener(v -> {
-            if (onClickListener != null) onClickListener.onClick(v);
-            setRotation(false);
-        });
+        mGestureDetector = new GestureDetector(mContext, onGestureListener);
+        mGestureDetector.setOnDoubleTapListener(onDoubleTapListener);
+        //解决长按屏幕无法拖动,但是会造成无法识别长按事件
+//        mGestureDetector.setIsLongpressEnabled(false);
 
-        mIvFloating.setOnLongClickListener(v -> {
-            if (onLongClickListener != null)
-                return onLongClickListener.onLongClick(v);
-            return false;
-        });
+//        mIvFloating.setOnClickListener(v -> {
+//            if (onClickListener != null) onClickListener.onClick();
+//            setRotation(false);
+//        });
+//
+//        mIvFloating.setOnLongClickListener(view -> {
+//            if (onLongClickListener != null) {
+//                return onLongClickListener.onLongClick(view);
+//            }
+////            Vibrator vib = (Vibrator) mContext.getSystemService(Service.VIBRATOR_SERVICE);   //获取系统震动服务
+////            vib.vibrate(70);   //震动70毫秒
+//
+////
+////            switch (event.getAction()) {
+////                case MotionEvent.ACTION_DOWN:
+////                    //手指按下
+////                    //获取第一次接触屏幕
+////                    startX = (int) event.getX();
+////                    startY = (int) event.getY();
+////                    break;
+////                case MotionEvent.ACTION_MOVE:
+////                    //手指拖动
+////                    //获取距离差
+////                    int dx = (int) event.getX() - startX;
+////                    int dy = (int) event.getY() - startY;
+////                    //更改Imageview在窗体的位置
+//////
+//////                            v.layout(v.getLeft() + dx, v.getTop() + dy,
+//////                                    v.getRight() + dx, v.getBottom() + dy);
+////
+////                    LayoutParams lp =
+////                            (LayoutParams) mLayout.getLayoutParams();
+////
+////                    marginBottom = lp.bottomMargin;
+////
+////                    lp.bottomMargin = marginBottom + dy;
+////
+////                    mLayout.setLayoutParams(lp);
+////                    //获取移动后的位置
+////                    startX = (int) event.getX();
+////                    startY = (int) event.getY();
+////                    break;
+////                case MotionEvent.ACTION_UP:
+////                    //手指弹起
+////                    startX = (int) event.getX();
+////                    startY = (int) event.getY();
+////                    break;
+////            }
+//
+////            view.startDrag(null, new View.DragShadowBuilder(view), null, 0);
+//            return false;
+//        });
+//
+//        mIvFloating.setOnDragListener((View v, DragEvent event) -> {
+//            Vibrator vib = (Vibrator) mContext.getSystemService(Service.VIBRATOR_SERVICE);   //获取系统震动服务
+//            vib.vibrate(70);   //震动70毫秒
+//
+//            switch (event.getAction()) {
+//                case DragEvent.ACTION_DRAG_STARTED:
+//                    //Toast.makeText(TargetItemSelectedTestActivity.this, "开始拖动", Toast.LENGTH_LONG).show();
+//
+//                    //手指按下
+//                    //获取第一次接触屏幕
+//                    startX = (int) event.getX();
+//                    startY = (int) event.getY();
+//                    break;
+//                case DragEvent.ACTION_DRAG_ENTERED:
+//                    //Toast.makeText(TargetItemSelectedTestActivity.this, "进入目标区域", Toast.LENGTH_LONG).show();
+//                    //这里可以改变目标区域的背景色
+//                    startY = (int) event.getY();
+//                    Log.e("s","Y: " + startY);
+//                    break;
+//                case DragEvent.ACTION_DRAG_EXITED:
+//                    startY = (int) event.getY();
+//                    Log.e("ss","Y: " + startY);
+//                    //Toast.makeText(TargetItemSelectedTestActivity.this, "离开目标区域", Toast.LENGTH_LONG).show();
+//                    break;
+//
+//                case DragEvent.ACTION_DROP:
+//                    //手指弹起
+//                    startX = (int) event.getX();
+//                    startY = (int) event.getY();
+//                    LogUtils.e("s","Y: " + startY);
+//
+//                    Log.e("sss","Y: " + startY);
+//                    //Toast.makeText(TargetItemSelectedTestActivity.this, "放手", Toast.LENGTH_LONG).show();
+//                    LayoutParams lp =
+//                            (LayoutParams) mLayout.getLayoutParams();
+//                    lp.bottomMargin = startY;
+//
+//                    mLayout.setLayoutParams(lp);
+//
+////
+////                    switch (event.getAction()) {
+////                        case MotionEvent.ACTION_DOWN:
+////                            //手指按下
+////                            //获取第一次接触屏幕
+////                            startX = (int) event.getX();
+////                            startY = (int) event.getY();
+////                            break;
+////                        case MotionEvent.ACTION_MOVE:
+////                            //手指拖动
+////                            //获取距离差
+////                            int dx = (int) event.getX() - startX;
+////                            int dy = (int) event.getY() - startY;
+////                            //更改Imageview在窗体的位置
+//////
+//////                            v.layout(v.getLeft() + dx, v.getTop() + dy,
+//////                                    v.getRight() + dx, v.getBottom() + dy);
+////
+////                            LayoutParams lp =
+////                                    (LayoutParams) mLayout.getLayoutParams();
+////
+////                            marginBottom = lp.bottomMargin;
+////
+////                            lp.bottomMargin = marginBottom + dy;
+////
+////                            mLayout.setLayoutParams(lp);
+////                            //获取移动后的位置
+////                            startX = (int) event.getX();
+////                            startY = (int) event.getY();
+////                            break;
+////                        case MotionEvent.ACTION_UP:
+////                            //手指弹起
+////                            startX = (int) event.getX();
+////                            startY = (int) event.getY();
+////                            break;
+////                    }
+//                    break;
+//                case DragEvent.ACTION_DRAG_LOCATION:
+//                    startY = (int) event.getY();
+//                    Log.e("ssss","Y: " + startY);
+//                    //Ignore the event
+//                    break;
+//            }
+//
+//            return true;
+//        });
+//
+//        // 如果手指放在imageView上拖动
+//        mIvFloating.setOnTouchListener(new OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//
+//                // event.getRawX(); //获取手指第一次接触屏幕在x方向的坐标
+//                switch (event.getAction()) {
+//                    case MotionEvent.ACTION_DOWN:// 获取手指第一次接触屏幕
+//                        startX = (int) event.getRawX();
+//                        startY = (int) event.getRawY();
+//                        break;
+//                    case MotionEvent.ACTION_MOVE:// 手指在屏幕上移动对应的事件
+//                        int x = (int) event.getRawX();
+//                        int y = (int) event.getRawY();
+//                        // 获取手指移动的距离
+//                        int dx = x - startX;
+//                        int dy = y - startY;
+//                        // 得到imageView最开始的各顶点的坐标
+//                        int l = mIvFloating.getLeft();
+//                        int r = mIvFloating.getRight();
+//                        int t = mIvFloating.getTop();
+//                        int b = mIvFloating.getBottom();
+//                        // 更改imageView在窗体的位置
+////                        mIvFloating.layout(0, t + dy, 0, b + dy);
+//
+//                        LayoutParams lp =
+//                                (LayoutParams) mLayout.getLayoutParams();
+//                        lp.bottomMargin = b;
+//
+//                        mLayout.setLayoutParams(lp);
+//
+//                        // 获取移动后的位置
+//                        startX = (int) event.getRawX();
+//                        startY = (int) event.getRawY();
+//                        break;
+//                    case MotionEvent.ACTION_UP:// 手指离开屏幕对应事件
+//                        // 记录最后图片在窗体的位置
+//                        int lasty = mIvFloating.getTop();
+//                        int lastx = mIvFloating.getLeft();
+////                        SharedPreferences.Editor editor = sp.edit();
+////                        editor.putInt("lasty", lasty);
+////                        editor.putInt("lastx", lastx);
+////                        editor.commit();
+//                        break;
+//                }
+//                return true;
+//            }
+//        });
 
         floatingAdapter = new FloatingMenuAdapter(floatingMenuList);
 
@@ -141,6 +338,147 @@ public class FloatingMenuView extends FrameLayout {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
     }
+
+    private void setTranslation(float deltaX, float deltaY) {
+        // 正数往右，负数往左
+        setTranslationX(deltaX);
+        setTranslationY(deltaY);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                startX = (int) event.getRawX();
+                startY = (int) event.getRawY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                ViewGroup mViewGroup = (ViewGroup) getParent();
+
+                int mParentWidth = 0, mParentHeight = 0;
+                if (null != mViewGroup) {
+                    mParentWidth = mViewGroup.getWidth();
+                    mParentHeight = mViewGroup.getHeight();
+                }
+
+                float rawX = event.getRawX();
+                float rawY = event.getRawY();
+
+//                float translationX = getTranslationX();
+//                float translationY = getTranslationY();
+
+                float translationX;
+                if (getTranslationX() >= 0) {
+                    translationX = Math.min(getTranslationX(),
+                            mParentWidth - Math.max(rawX, mParentWidth - SizeUtils.getMeasuredWidth(mIvFloating)));
+                } else {
+                    if (Math.abs(getTranslationX()) < mParentWidth - SizeUtils.getMeasuredWidth(mIvFloating)) {
+                        translationX = getTranslationX();
+                    } else {
+                        //todo
+                        translationX = SizeUtils.getMeasuredWidth(mIvFloating) - mParentWidth + rawX;
+                    }
+//                    translationX = Math.max(getTranslationX(),
+//                            Math.min(rawX, mParentWidth - SizeUtils.getMeasuredWidth(mIvFloating)) - mParentWidth);
+//                    translationX = mParentWidth - SizeUtils.getMeasuredWidth(mIvFloating) + getTranslationX() > 0
+//                            ? getTranslationX() : rawX;
+                }
+
+                float translationY;
+                if (getTranslationY() >= 0) {
+                    translationY = Math.min(getTranslationY(),
+                            mParentHeight - Math.max(rawY, mParentHeight - SizeUtils.getMeasuredHeight(mIvFloating)));
+                } else {
+                    translationY = Math.max(getTranslationY(),
+                            Math.min(rawY, mParentHeight - SizeUtils.getMeasuredHeight(mIvFloating)) - mParentHeight);
+                }
+
+                // 计算偏移量
+                float deltaX = (rawX - startX) + translationX;
+                float deltaY = (rawY - startY) + translationY;
+
+                SizeUtils.getMeasuredHeight(mLayout);
+                ConvertUtils.dp2px(SizeUtils.getMeasuredHeight(mLayout));
+
+                Log.e(TAG, "rawY : " + rawY);
+                Log.e(TAG, "translationY : " + translationY);
+                Log.e(TAG, "deltaY : " + deltaY);
+                Log.e(TAG, "mParentWidth : " + mParentWidth);
+                Log.e(TAG, "mParentHeight : " + mParentHeight);
+
+                setTranslation(deltaX, deltaY);
+
+                startX = (int) event.getRawX();
+                startY = (int) event.getRawY();
+                break;
+            case MotionEvent.ACTION_UP:
+                break;
+            default:
+                break;
+        }
+        // 接管onTouchEvent
+        return mGestureDetector.onTouchEvent(event);
+    }
+
+    GestureDetector.OnGestureListener onGestureListener = new GestureDetector.OnGestureListener() {
+        @Override
+        public boolean onDown(MotionEvent e) {
+            Log.i(TAG, "onDown: 按下");
+            return true;
+        }
+
+        @Override
+        public void onShowPress(MotionEvent e) {
+            Log.i(TAG, "onShowPress: 刚碰上还没松开");
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            Log.i(TAG, "onSingleTapUp: 轻轻一碰后马上松开");
+            return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            Log.i(TAG, "onScroll: 按下后拖动");
+            return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            Log.i(TAG, "onLongPress: 长按屏幕");
+            Vibrator vib = (Vibrator) mContext.getSystemService(Service.VIBRATOR_SERVICE);   //获取系统震动服务
+            vib.vibrate(70);   //震动70毫秒
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            Log.i(TAG, "onFling: 滑动后松开");
+            return true;
+        }
+    };
+
+    GestureDetector.OnDoubleTapListener onDoubleTapListener = new GestureDetector.OnDoubleTapListener() {
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            Log.i(TAG, "onSingleTapConfirmed: 严格的单击");
+            if (onClickListener != null) onClickListener.onClick();
+            setRotation(false);
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            Log.i(TAG, "onDoubleTap: 双击");
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) {
+            Log.i(TAG, "onDoubleTapEvent: 表示发生双击行为");
+            return true;
+        }
+    };
 
     /**
      * 判断字符串是否为空
@@ -311,6 +649,8 @@ public class FloatingMenuView extends FrameLayout {
         lp.topMargin = ConvertUtils.dp2px(top);
         lp.rightMargin = ConvertUtils.dp2px(right);
         lp.bottomMargin = ConvertUtils.dp2px(bottom);
+
+        marginBottom = lp.bottomMargin;
 
         mLayout.setLayoutParams(lp);
         return this;
@@ -597,7 +937,7 @@ public class FloatingMenuView extends FrameLayout {
      * 悬浮按钮 - 单击 - 监听接口
      */
     public interface OnClickListener {
-        void onClick(View v);
+        void onClick();
     }
 
     /**
