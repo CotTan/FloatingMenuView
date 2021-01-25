@@ -1,4 +1,4 @@
-package com.cot.floatingmenuview.view.floating;
+package com.cot.floatingmenuview.view.floating.bean;
 
 /**
  * 是否被选中

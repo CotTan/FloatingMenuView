@@ -1,6 +1,6 @@
 package com.cot.floatingmenuview.model.bean;
 
-import com.cot.floatingmenuview.view.floating.CheckedBean;
+import com.cot.floatingmenuview.view.floating.bean.CheckedBean;
 
 public class StudentBean extends CheckedBean {
     String name;

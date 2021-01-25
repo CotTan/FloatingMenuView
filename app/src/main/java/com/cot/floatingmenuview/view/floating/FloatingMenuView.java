@@ -15,25 +15,26 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.SizeUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.cot.floatingmenuview.R;
 import com.cot.floatingmenuview.view.RecycleViewGridDivider;
 import com.cot.floatingmenuview.view.floating.adapter.FloatingMenuAdapter;
+import com.cot.floatingmenuview.view.floating.bean.CheckedBean;
 import com.cot.floatingmenuview.view.floating.bean.FloatingMenuBean;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * @author COT
@@ -355,10 +356,16 @@ public class FloatingMenuView extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 ViewGroup mViewGroup = (ViewGroup) getParent();
 
-                int mParentWidth = 0, mParentHeight = 0;
+                int mParentWidth = 0, mParentHeight = 0, parentTop = 0, parentBottom = 0;
                 if (null != mViewGroup) {
                     mParentWidth = mViewGroup.getWidth();
                     mParentHeight = mViewGroup.getHeight();
+                    parentTop = mViewGroup.getTop();
+                    parentBottom = mViewGroup.getBottom();
+                    Log.e(TAG, "mViewGroup.getTop() : " + mViewGroup.getTop());
+                    Log.e(TAG, "mViewGroup.getBottom() : " + mViewGroup.getBottom());
+                    Log.e(TAG, "mViewGroup.getLeft() : " + mViewGroup.getLeft());
+                    Log.e(TAG, "mViewGroup.getRight() : " + mViewGroup.getRight());
                 }
 
                 float rawX = event.getRawX();
@@ -406,7 +413,9 @@ public class FloatingMenuView extends FrameLayout {
                 Log.e(TAG, "mParentWidth : " + mParentWidth);
                 Log.e(TAG, "mParentHeight : " + mParentHeight);
 
-                setTranslation(deltaX, deltaY);
+                if (rawY > parentTop) {
+                    setTranslation(deltaX, deltaY);
+                }
 
                 startX = (int) event.getRawX();
                 startY = (int) event.getRawY();
