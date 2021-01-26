@@ -85,7 +85,7 @@ public class MainActivity extends BaseActivity {
                 .setMenuBackground(R.drawable.shape_solid_bg_blue_10)
                 .setDividingLineColor(getResources().getColor(R.color.white))
                 .setOnClickListener(() -> {
-                ToastUtils.showShort("单击 - 悬浮按钮");
+                    ToastUtils.showShort("单击 - 悬浮按钮");
                 })
 //                .setOnLongClickListener((FloatingMenuView.OnLongClickListener) v -> {
 //                    ToastUtils.showShort("长按 - 悬浮按钮");

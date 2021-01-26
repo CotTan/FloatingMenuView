@@ -1,9 +1,13 @@
 package com.cot.floatingmenuview.view.floating;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -17,12 +21,14 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.customview.widget.ViewDragHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.blankj.utilcode.util.ConvertUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.cot.floatingmenuview.R;
+import com.cot.floatingmenuview.utils.GeneralUtils;
 import com.cot.floatingmenuview.view.RecycleViewGridDivider;
 import com.cot.floatingmenuview.view.floating.adapter.FloatingMenuAdapter;
 import com.cot.floatingmenuview.view.floating.bean.CheckedBean;
@@ -32,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.lang.String.valueOf;
 
 /**
  * @author COT
@@ -61,6 +69,11 @@ public class FloatingMenuView extends FrameLayout implements View.OnTouchListene
     protected int screenHeight;
     protected int lastX;
     protected int lastY;
+    boolean mNeedLayout = true;
+
+    private ViewDragHelper viewDragHelper;
+
+    private SharedPreferences.Editor editor;
 
     //悬浮按钮
     private OnClickListener onClickListener;
@@ -307,124 +320,56 @@ public class FloatingMenuView extends FrameLayout implements View.OnTouchListene
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
     }
+//
+//    @Override
+//    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+//        int cWidth = 0;
+//        int cHeight = 0;
+//        MarginLayoutParams params;
+//        for (int i = 0; i < getChildCount(); i++) {
+//            View childView = getChildAt(i);
+//            cWidth = childView.getMeasuredWidth();
+//            cHeight = childView.getMeasuredHeight();
+//            params = (MarginLayoutParams) childView.getLayoutParams();
+//
+//            int cl = 0;
+//            int ct = 0;
+//            int cr = 0;
+//            int cb = 0;
+//            switch (i) {
+//                case 0:
+//                    cl = params.leftMargin;
+//                    ct = params.topMargin;
+//                    break;
+//                case 1:
+//                    cl = getWidth() - cWidth - params.leftMargin - params.rightMargin;
+//                    ct = params.topMargin;
+//                    break;
+//                case 2:
+//                    cl = params.leftMargin;
+//                    ct = getHeight() - cHeight - params.topMargin - params.bottomMargin;
+//                    break;
+//                case 3:
+//                    cl = getWidth() - cWidth - params.leftMargin - params.rightMargin;
+//                    ct = getHeight() - cHeight - params.topMargin - params.bottomMargin;
+//                    break;
+//            }
+//
+//            cr = cl + cWidth;
+//            cb = ct + cHeight;
+//
+//            childView.layout(cl, ct, cr, cb);
+//        }
+////        super.onLayout(changed, left, top, right, bottom);
+//        Log.i(TAG, "onLayout: 更新UI");
+//    }
 
-    private void setTranslation(float deltaX, float deltaY) {
-        // 正数往右，负数往左
-        setTranslationX(deltaX);
-        setTranslationY(deltaY);
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        Log.e(TAG, "onLayout");
+        if (!mNeedLayout) return;
+        super.onLayout(changed, l, t, r, b);
     }
-//
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        switch (event.getAction()) {
-//            case MotionEvent.ACTION_DOWN:
-//                startX = (int) event.getRawX();
-//                startY = (int) event.getRawY();
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                ViewGroup mViewGroup = (ViewGroup) getParent();
-//
-//                int mParentWidth = 0, mParentHeight = 0, parentTop = 0, parentBottom = 0;
-//                if (null != mViewGroup) {
-//                    mParentWidth = mViewGroup.getWidth();
-//                    mParentHeight = mViewGroup.getHeight();
-//                    parentTop = mViewGroup.getTop();
-//                    parentBottom = mViewGroup.getBottom();
-//                    Log.e(TAG, "mViewGroup.getTop() : " + mViewGroup.getTop());
-//                    Log.e(TAG, "mViewGroup.getBottom() : " + mViewGroup.getBottom());
-//                    Log.e(TAG, "mViewGroup.getLeft() : " + mViewGroup.getLeft());
-//                    Log.e(TAG, "mViewGroup.getRight() : " + mViewGroup.getRight());
-//                }
-//
-//                float rawX = event.getRawX();
-//                float rawY = event.getRawY();
-//
-//                float translationX = getTranslationX();
-//                float translationY = getTranslationY();
-//
-////                float translationX;
-////                if (getTranslationX() >= 0) {
-////                    translationX = Math.min(getTranslationX(),
-////                            mParentWidth - Math.max(rawX, mParentWidth - SizeUtils.getMeasuredWidth(mIvFloating)));
-////                } else {
-////                    if (Math.abs(getTranslationX()) < mParentWidth - SizeUtils.getMeasuredWidth(mIvFloating)) {
-////                        translationX = getTranslationX();
-////                    } else {
-////                        //todo
-////                        translationX = SizeUtils.getMeasuredWidth(mIvFloating) - mParentWidth + rawX;
-////                    }
-//////                    translationX = Math.max(getTranslationX(),
-//////                            Math.min(rawX, mParentWidth - SizeUtils.getMeasuredWidth(mIvFloating)) - mParentWidth);
-//////                    translationX = mParentWidth - SizeUtils.getMeasuredWidth(mIvFloating) + getTranslationX() > 0
-//////                            ? getTranslationX() : rawX;
-////                }
-////
-////                float translationY;
-////                if (getTranslationY() >= 0) {
-////                    translationY = Math.min(getTranslationY(),
-////                            mParentHeight - Math.max(rawY, mParentHeight - SizeUtils.getMeasuredHeight(mIvFloating)));
-////                } else {
-////                    translationY = Math.max(getTranslationY(),
-////                            Math.min(rawY, mParentHeight - SizeUtils.getMeasuredHeight(mIvFloating)) - mParentHeight);
-////                }
-//
-//                // 计算偏移量
-//                float deltaX = (rawX - startX) + translationX;
-//                float deltaY = (rawY - startY) + translationY;
-//
-//                SizeUtils.getMeasuredHeight(mLayout);
-//                ConvertUtils.dp2px(SizeUtils.getMeasuredHeight(mLayout));
-//
-//                Log.e(TAG, "rawY : " + rawY);
-//                Log.e(TAG, "translationY : " + translationY);
-//                Log.e(TAG, "deltaY : " + deltaY);
-//                Log.e(TAG, "mParentWidth : " + mParentWidth);
-//                Log.e(TAG, "mParentHeight : " + mParentHeight);
-//
-//                if (rawY > parentTop) {
-//                    setTranslation(deltaX, deltaY);
-//                }
-//
-//                startX = (int) event.getRawX();
-//                startY = (int) event.getRawY();
-//                break;
-//            case MotionEvent.ACTION_UP:
-//                break;
-//            default:
-//                break;
-//        }
-//        // 接管onTouchEvent
-//        return true;
-//    }
-
-//    @Override
-//    public boolean onTouch(View v, MotionEvent event) {
-//        int action = event.getAction() & MotionEvent.ACTION_MASK;
-//        if (action == MotionEvent.ACTION_DOWN) {
-//            oriLeft = v.getLeft();
-//            oriRight = v.getRight();
-//            oriTop = v.getTop();
-//            oriBottom = v.getBottom();
-//            lastY = (int) event.getRawY();
-//            lastX = (int) event.getRawX();
-//            dragDirection = getDirection(v, (int) event.getX(),
-//                    (int) event.getY());
-//        }
-//        if (action == MotionEvent.ACTION_POINTER_DOWN) {
-//            oriLeft = v.getLeft();
-//            oriRight = v.getRight();
-//            oriTop = v.getTop();
-//            oriBottom = v.getBottom();
-//            lastY = (int) event.getRawY();
-//            lastX = (int) event.getRawX();
-//            dragDirection = TOUCH_TWO;
-//            oriDis = distance(event);
-//        }
-//        // 处理拖动事件
-//        delDrag(v, event, action);
-//        invalidate();
-//        return false;
-//    }
 
     //todo  有效，但是 点击会回到原来的位置
     @Override
@@ -454,66 +399,26 @@ public class FloatingMenuView extends FrameLayout implements View.OnTouchListene
                     r = screenWidth;
                     l = r - v.getWidth();
                 }
-                if (b > screenHeight) {
-                    b = screenHeight;
+                //获取虚拟按钮高度
+                int navigationBarHeight = GeneralUtils.getNavigationBarHeightIfRoom(mContext);
+
+                if (b > screenHeight - navigationBarHeight) {
+                    b = screenHeight - navigationBarHeight;
                     t = b - v.getHeight();
                 }
                 v.layout(l, t, r, b);
                 lastX = (int) event.getRawX();
                 lastY = (int) event.getRawY();
                 v.postInvalidate();
+                mNeedLayout = true;
+                Log.e(TAG, "ACTION_MOVE");
                 break;
             case MotionEvent.ACTION_UP:
                 break;
         }
-        // 接管onTouchEvent
+//        // 接管onTouchEvent
         return mGestureDetector.onTouchEvent(event);
     }
-
-    //
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        switch (event.getAction()) {
-//            case MotionEvent.ACTION_DOWN:
-//                lastX = (int) event.getRawX();// 获取触摸事件触摸位置的原始X坐标
-//                lastY = (int) event.getRawY();
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                int dx = (int) event.getRawX() - lastX;
-//                int dy = (int) event.getRawY() - lastY;
-//                int l = mLayout.getLeft() + dx;
-//                int b = mLayout.getBottom() + dy;
-//                int r = mLayout.getRight() + dx;
-//                int t = mLayout.getTop() + dy;
-//                // 下面判断移动是否超出屏幕
-//                if (l < 0) {
-//                    l = 0;
-//                    r = l + mLayout.getWidth();
-//                }
-//                if (t < 0) {
-//                    t = 0;
-//                    b = t + mLayout.getHeight();
-//                }
-//                if (r > screenWidth) {
-//                    r = screenWidth;
-//                    l = r - mLayout.getWidth();
-//                }
-//                if (b > screenHeight) {
-//                    b = screenHeight;
-//                    t = b - mLayout.getHeight();
-//                }
-//                mLayout.layout(l, t, r, b);
-//                lastX = (int) event.getRawX();
-//                lastY = (int) event.getRawY();
-//                mLayout.postInvalidate();
-//                break;
-//            case MotionEvent.ACTION_UP:
-//                break;
-//        }
-//        // 接管onTouchEvent
-//        return mGestureDetector.onTouchEvent(event);
-//    }
-
 
     GestureDetector.OnGestureListener onGestureListener = new GestureDetector.OnGestureListener() {
         @Override
@@ -547,7 +452,7 @@ public class FloatingMenuView extends FrameLayout implements View.OnTouchListene
         }
 
         @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        public boolean onFling(MotionEvent event, MotionEvent e, float velocityX, float velocityY) {
             Log.i(TAG, "onFling: 滑动后松开");
             return true;
         }
@@ -556,6 +461,7 @@ public class FloatingMenuView extends FrameLayout implements View.OnTouchListene
     GestureDetector.OnDoubleTapListener onDoubleTapListener = new GestureDetector.OnDoubleTapListener() {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent event) {
+            mNeedLayout = false;
             Log.i(TAG, "onSingleTapConfirmed: 严格的单击");
             if (onClickListener != null) onClickListener.onClick();
             setRotation(false);
