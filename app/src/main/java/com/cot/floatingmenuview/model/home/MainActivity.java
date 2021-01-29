@@ -1,6 +1,9 @@
 package com.cot.floatingmenuview.model.home;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,7 +14,9 @@ import com.cot.floatingmenuview.base.BaseActivity;
 import com.cot.floatingmenuview.model.adapter.StudentAdapter;
 import com.cot.floatingmenuview.model.bean.StudentBean;
 import com.cot.floatingmenuview.view.RecycleViewGridDivider;
+import com.cot.floatingmenuview.view.floating.DragFrameLayout;
 import com.cot.floatingmenuview.view.floating.FloatingMenuView;
+import com.cot.floatingmenuview.view.floating.FloatingView;
 import com.cot.floatingmenuview.view.floating.bean.FloatingMenuBean;
 
 import java.util.ArrayList;
@@ -23,8 +28,16 @@ public class MainActivity extends BaseActivity {
 
     @BindView(R.id.rv_main_student)
     RecyclerView rvMainStudent;
-    @BindView(R.id.fmv_floating)
-    FloatingMenuView fmvFloating;
+//    @BindView(R.id.fmv_floating)
+//    FloatingMenuView fmvFloating;
+    @BindView(R.id.fv_floating)
+    FloatingView fvFloating;
+//    @BindView(R.id.iv1)
+//    ImageView iv1;
+//    @BindView(R.id.tv1)
+//    TextView tv1;
+//    @BindView(R.id.df_content)
+//    DragFrameLayout dfContent;
 
     private List<FloatingMenuBean> floatingList;
 
@@ -68,7 +81,78 @@ public class MainActivity extends BaseActivity {
         floatingList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_TEXT, "反选"));
         floatingList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_TEXT, "保存"));
 
-        fmvFloating
+//        fmvFloating
+//                .setDate(floatingList) //两种方式都行
+//                .add(R.drawable.icon_to_top)
+//                .add("取消")
+//                .adds(R.drawable.icon_back, R.drawable.icon_to_top)
+//                .adds("测试", "制作")
+//                .adds(R.drawable.icon_back, "讨论", "调查", "发现", "知乎", "百度")
+//                .setTextColor(5, getResources().getColor(R.color.red))
+//                .setTextSize(5, 18)
+//                .setText("wow", 8)
+//                .setHasDividingLine(true)
+//                .setDividingLineHeight(1)
+//                .setMaxHeight(200)
+//                .setMargin(0, 10, 10, 20)
+//                .setMenuBackground(R.drawable.shape_solid_bg_blue_10)
+//                .setDividingLineColor(getResources().getColor(R.color.white))
+//                .setOnClickListener(() -> {
+//                    ToastUtils.showShort("单击 - 悬浮按钮");
+//                })
+////                .setOnLongClickListener((FloatingMenuView.OnLongClickListener) v -> {
+////                    ToastUtils.showShort("长按 - 悬浮按钮");
+////                    return false;
+////                })
+//                .setOnItemClickListener((adapter, view, position) -> {
+//                    switch (position) {
+//                        case 0:
+//                            rvMainStudent.scrollToPosition(0);
+//                            break;
+//                        case 1:
+//                            if (fmvFloating.getPositionName(position).equals("全选")) {
+//                                fmvFloating.setCheck(1, studentList).setText("取消全选", position);
+//                                studentAdapter.notifyDataSetChanged();
+//                            } else if (fmvFloating.getPositionName(position).equals("取消全选")) {
+//                                fmvFloating.setCheck(2, studentList).setText("全选", position);
+//                                studentAdapter.notifyDataSetChanged();
+//                            }
+//                            break;
+//                        case 2:
+//                            fmvFloating.setCheck(3, studentList);
+//                            studentAdapter.notifyDataSetChanged();
+//                            break;
+//                        case 3:
+//                            int count = 0;
+//                            for (StudentBean bean : studentList) {
+//                                if (bean.isChecked())
+//                                    count++;
+//                            }
+//                            ToastUtils.showShort("已选：" + count);
+//                            break;
+//                        case 8:
+//                            fmvFloating.setHideFloating(true);
+//                            break;
+//                        default:
+//                            ToastUtils.showShort("单击：" + fmvFloating.getFloatingList().get(position).getLabelName());
+//                            fmvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
+//                                    .setTextSize(position, 16);
+//                            break;
+//                    }
+//                })
+//                .setOnItemLongClickListener((adapter, view, position) -> {
+//                    ToastUtils.showShort("长按：" + fmvFloating.getFloatingList().get(position).getLabelName());
+//                    if (position == 8) {
+//                        fmvFloating.setHideFloating(true);
+//                    }
+//                    fmvFloating.setRotation(true);
+//                    fmvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
+//                            .setTextSize(position, 18);
+//                    return true;
+//                });
+
+
+        fvFloating
                 .setDate(floatingList) //两种方式都行
                 .add(R.drawable.icon_to_top)
                 .add("取消")
@@ -94,19 +178,20 @@ public class MainActivity extends BaseActivity {
                 .setOnItemClickListener((adapter, view, position) -> {
                     switch (position) {
                         case 0:
+                        case 4:
                             rvMainStudent.scrollToPosition(0);
                             break;
                         case 1:
-                            if (fmvFloating.getPositionName(position).equals("全选")) {
-                                fmvFloating.setCheck(1, studentList).setText("取消全选", position);
+                            if (fvFloating.getPositionName(position).equals("全选")) {
+                                fvFloating.setCheck(1, studentList).setText("取消全选", position);
                                 studentAdapter.notifyDataSetChanged();
-                            } else if (fmvFloating.getPositionName(position).equals("取消全选")) {
-                                fmvFloating.setCheck(2, studentList).setText("全选", position);
+                            } else if (fvFloating.getPositionName(position).equals("取消全选")) {
+                                fvFloating.setCheck(2, studentList).setText("全选", position);
                                 studentAdapter.notifyDataSetChanged();
                             }
                             break;
                         case 2:
-                            fmvFloating.setCheck(3, studentList);
+                            fvFloating.setCheck(3, studentList);
                             studentAdapter.notifyDataSetChanged();
                             break;
                         case 3:
@@ -118,25 +203,33 @@ public class MainActivity extends BaseActivity {
                             ToastUtils.showShort("已选：" + count);
                             break;
                         case 8:
-                            fmvFloating.setHideFloating(true);
+                            fvFloating.setHideFloating(true);
                             break;
                         default:
-                            ToastUtils.showShort("单击：" + fmvFloating.getFloatingList().get(position).getLabelName());
-                            fmvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
+                            ToastUtils.showShort("单击：" + fvFloating.getFloatingList().get(position).getLabelName());
+                            fvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
                                     .setTextSize(position, 16);
                             break;
                     }
                 })
                 .setOnItemLongClickListener((adapter, view, position) -> {
-                    ToastUtils.showShort("长按：" + fmvFloating.getFloatingList().get(position).getLabelName());
+                    ToastUtils.showShort("长按：" + fvFloating.getFloatingList().get(position).getLabelName());
                     if (position == 8) {
-                        fmvFloating.setHideFloating(true);
+                        fvFloating.setHideFloating(true);
                     }
-                    fmvFloating.setRotation(true);
-                    fmvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
+                    fvFloating.setRotation(true);
+                    fvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
                             .setTextSize(position, 18);
                     return true;
                 });
+
+//        dfContent.addDragChildView(iv1);
+//        iv1.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                ToastUtils.showShort("sss");
+//            }
+//        });
     }
 
 }

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
     android:orientation="vertical">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -14,11 +15,38 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.cot.floatingmenuview.view.floating.FloatingMenuView
-        android:id="@+id/fmv_floating"
+<!--    <com.cot.floatingmenuview.view.floating.FloatingMenuView-->
+<!--        android:id="@+id/fmv_floating"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent" />-->
+
+    <com.cot.floatingmenuview.view.floating.FloatingView
+        android:id="@+id/fv_floating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
+    <!--    <com.cot.floatingmenuview.view.floating.DragFrameLayout-->
+    <!--        android:id="@+id/df_content"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent">-->
+
+    <!--        <ImageView-->
+    <!--            android:id="@+id/iv1"-->
+    <!--            android:layout_width="100dp"-->
+    <!--            android:layout_height="100dp"-->
+    <!--            android:src="@mipmap/ic_launcher" />-->
+
+    <!--        <TextView-->
+    <!--            android:id="@+id/tv1"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_gravity="center"-->
+    <!--            android:text="可拖拽文字" />-->
+    <!--    </com.cot.floatingmenuview.view.floating.DragFrameLayout>-->
 </androidx.constraintlayout.widget.ConstraintLayout>

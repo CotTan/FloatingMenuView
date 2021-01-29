@@ -48,7 +48,7 @@ import static java.lang.String.valueOf;
  * //todo 拖拽功能暂不实现，xml配置 也暂不提供,且目前只考虑垂直方向的，
  * 目前不限制按钮组的个数，但是建议数量在10以下
  */
-public class FloatingMenuView extends FrameLayout implements View.OnTouchListener {
+public class FloatingMenuView extends FrameLayout /*implements View.OnTouchListener*/ {
     private String TAG = "FloatingMenuView";
     private Context mContext;
     private View views;
@@ -98,7 +98,7 @@ public class FloatingMenuView extends FrameLayout implements View.OnTouchListene
 
         initView();
         initScreenInfo();
-        setOnTouchListener(this);
+//        setOnTouchListener(this);
     }
 
     /**
@@ -286,6 +286,56 @@ public class FloatingMenuView extends FrameLayout implements View.OnTouchListene
                 return onItemLongClickListener.onItemLongClick(adapter, view, position);
             return false;
         });
+
+        mLayout.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        lastX = (int) event.getRawX();// 获取触摸事件触摸位置的原始X坐标
+                        lastY = (int) event.getRawY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        int dx = (int) event.getRawX() - lastX;
+                        int dy = (int) event.getRawY() - lastY;
+                        int l = v.getLeft() + dx;
+                        int b = v.getBottom() + dy;
+                        int r = v.getRight() + dx;
+                        int t = v.getTop() + dy;
+                        // 下面判断移动是否超出屏幕
+                        if (l < 0) {
+                            l = 0;
+                            r = l + v.getWidth();
+                        }
+                        if (t < 0) {
+                            t = 0;
+                            b = t + v.getHeight();
+                        }
+                        if (r > screenWidth) {
+                            r = screenWidth;
+                            l = r - v.getWidth();
+                        }
+                        //获取虚拟按钮高度
+                        int navigationBarHeight = GeneralUtils.getNavigationBarHeightIfRoom(mContext);
+
+                        if (b > screenHeight - navigationBarHeight) {
+                            b = screenHeight - navigationBarHeight;
+                            t = b - v.getHeight();
+                        }
+                        v.layout(l, t, r, b);
+                        lastX = (int) event.getRawX();
+                        lastY = (int) event.getRawY();
+                        v.postInvalidate();
+                        mNeedLayout = true;
+                        Log.e(TAG, "ACTION_MOVE");
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        break;
+                }
+//        // 接管onTouchEvent
+                return mGestureDetector.onTouchEvent(event);
+            }
+        });
     }
 
     /**
@@ -364,61 +414,61 @@ public class FloatingMenuView extends FrameLayout implements View.OnTouchListene
 //        Log.i(TAG, "onLayout: 更新UI");
 //    }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        Log.e(TAG, "onLayout");
-        if (!mNeedLayout) return;
-        super.onLayout(changed, l, t, r, b);
-    }
+//    @Override
+//    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+//        Log.e(TAG, "onLayout");
+//        if (!mNeedLayout) return;
+//        super.onLayout(changed, l, t, r, b);
+//    }
 
     //todo  有效，但是 点击会回到原来的位置
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                lastX = (int) event.getRawX();// 获取触摸事件触摸位置的原始X坐标
-                lastY = (int) event.getRawY();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                int dx = (int) event.getRawX() - lastX;
-                int dy = (int) event.getRawY() - lastY;
-                int l = v.getLeft() + dx;
-                int b = v.getBottom() + dy;
-                int r = v.getRight() + dx;
-                int t = v.getTop() + dy;
-                // 下面判断移动是否超出屏幕
-                if (l < 0) {
-                    l = 0;
-                    r = l + v.getWidth();
-                }
-                if (t < 0) {
-                    t = 0;
-                    b = t + v.getHeight();
-                }
-                if (r > screenWidth) {
-                    r = screenWidth;
-                    l = r - v.getWidth();
-                }
-                //获取虚拟按钮高度
-                int navigationBarHeight = GeneralUtils.getNavigationBarHeightIfRoom(mContext);
-
-                if (b > screenHeight - navigationBarHeight) {
-                    b = screenHeight - navigationBarHeight;
-                    t = b - v.getHeight();
-                }
-                v.layout(l, t, r, b);
-                lastX = (int) event.getRawX();
-                lastY = (int) event.getRawY();
-                v.postInvalidate();
-                mNeedLayout = true;
-                Log.e(TAG, "ACTION_MOVE");
-                break;
-            case MotionEvent.ACTION_UP:
-                break;
-        }
-//        // 接管onTouchEvent
-        return mGestureDetector.onTouchEvent(event);
-    }
+//    @Override
+//    public boolean onTouch(View v, MotionEvent event) {
+//        switch (event.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                lastX = (int) event.getRawX();// 获取触摸事件触摸位置的原始X坐标
+//                lastY = (int) event.getRawY();
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                int dx = (int) event.getRawX() - lastX;
+//                int dy = (int) event.getRawY() - lastY;
+//                int l = v.getLeft() + dx;
+//                int b = v.getBottom() + dy;
+//                int r = v.getRight() + dx;
+//                int t = v.getTop() + dy;
+//                // 下面判断移动是否超出屏幕
+//                if (l < 0) {
+//                    l = 0;
+//                    r = l + v.getWidth();
+//                }
+//                if (t < 0) {
+//                    t = 0;
+//                    b = t + v.getHeight();
+//                }
+//                if (r > screenWidth) {
+//                    r = screenWidth;
+//                    l = r - v.getWidth();
+//                }
+//                //获取虚拟按钮高度
+//                int navigationBarHeight = GeneralUtils.getNavigationBarHeightIfRoom(mContext);
+//
+//                if (b > screenHeight - navigationBarHeight) {
+//                    b = screenHeight - navigationBarHeight;
+//                    t = b - v.getHeight();
+//                }
+//                v.layout(l, t, r, b);
+//                lastX = (int) event.getRawX();
+//                lastY = (int) event.getRawY();
+//                v.postInvalidate();
+//                mNeedLayout = true;
+//                Log.e(TAG, "ACTION_MOVE");
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                break;
+//        }
+////        // 接管onTouchEvent
+//        return mGestureDetector.onTouchEvent(event);
+//    }
 
     GestureDetector.OnGestureListener onGestureListener = new GestureDetector.OnGestureListener() {
         @Override
