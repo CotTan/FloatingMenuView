@@ -10,19 +10,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 
+import com.blankj.utilcode.util.BarUtils;
+import com.blankj.utilcode.util.ScreenUtils;
 import com.cot.floatingmenuview.utils.GeneralUtils;
 
+/**
+ * 拖拽监听
+ * //todo 依附功能虽然可以使用，但是需要优化，移动距离过小会 过动上移
+ * 以右下角为参考坐标，参考链接为左上角
+ * 参考链接 @link｛https://blog.csdn.net/sl2018god/article/details/83109199｝
+ */
 public class OnDragTouchListener implements View.OnTouchListener {
 
     private int mScreenWidth, mScreenHeight;//屏幕宽高
     private float mOriginalX, mOriginalY;//手指按下时的初始位置
-    private float mDistanceX, mDistanceY;//记录手指与view的左上角的距离
+    private float mDistanceX, mDistanceY;//记录手指与view的右下角角的距离
     private int left, top, right, bottom;
-    private OnDraggableClickListener mListener;
-    private boolean hasAutoPullToBorder;//标记是否开启自动拉到边缘功能
+    private int navHeight;//虚拟按钮高度
+    private int titleHeight; //标题栏+状态栏
 
     private Context mContext;
-    private boolean isDrag = true;//默认可拖拽
+    private boolean hasAutoPullToBorder;//是否开启自动依附边缘
+    private boolean isDrag = false;//默认可拖拽
+    private boolean isMoved = false;//是否移动过 默认不是(如果没此参数 第一次点击可能会有问题)
+
+    private int sensitivity = 5;//移动灵敏度，超过该值则表示移动，默认为 5
+
+    private OnDraggableClickListener mListener;
 
     public OnDragTouchListener(Context context) {
         this(context, false);
@@ -31,14 +45,25 @@ public class OnDragTouchListener implements View.OnTouchListener {
     public OnDragTouchListener(Context context, boolean isAutoPullToBorder) {
         this.mContext = context;
         hasAutoPullToBorder = isAutoPullToBorder;
+
+        init();
+    }
+
+    private void init() {
+        //虚拟按钮
+        navHeight = GeneralUtils.getCurrentNavigationBarHeight((Activity) mContext);
+
+        //标题栏+状态栏
+        titleHeight = BarUtils.getNavBarHeight() + BarUtils.getStatusBarHeight();
     }
 
     @Override
     public boolean onTouch(final View v, MotionEvent event) {
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mScreenWidth = v.getResources().getDisplayMetrics().widthPixels;
-                mScreenHeight = v.getResources().getDisplayMetrics().heightPixels;
+                mScreenWidth = ScreenUtils.getScreenWidth();
+                mScreenHeight = ScreenUtils.getScreenHeight();
                 mOriginalX = event.getRawX();
                 mOriginalY = event.getRawY();
                 mDistanceX = event.getRawX() - v.getLeft();
@@ -52,6 +77,7 @@ public class OnDragTouchListener implements View.OnTouchListener {
                 if (!isDrag) {
                     return false;
                 }
+                isMoved = true;
                 left = (int) (event.getRawX() - mDistanceX);
                 top = (int) (event.getRawY() - mDistanceY);
                 right = left + v.getWidth();
@@ -60,16 +86,16 @@ public class OnDragTouchListener implements View.OnTouchListener {
                     left = 0;
                     right = left + v.getWidth();
                 }
-                if (top < 0) {
-                    top = 0;
+
+                if (top < titleHeight) {
+                    top = titleHeight;
                     bottom = top + v.getHeight();
                 }
+
                 if (right > mScreenWidth) {
                     right = mScreenWidth;
                     left = right - v.getWidth();
                 }
-
-                int navHeight = GeneralUtils.getCurrentNavigationBarHeight((Activity) mContext);
 
                 if (bottom > mScreenHeight - navHeight) {
                     bottom = mScreenHeight - navHeight;
@@ -78,15 +104,16 @@ public class OnDragTouchListener implements View.OnTouchListener {
                 v.layout(left, top, right, bottom);
                 break;
             case MotionEvent.ACTION_UP:
-                //在拖动过按钮后，如果其他view刷新导致重绘，会让按钮重回原点，所以需要更改布局参数
-                ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                startAutoPull(v, lp);
-                //如果移动距离过小，则判定为点击
-                if (Math.abs(event.getRawX() - mOriginalX) < 10 &&
-                        Math.abs(event.getRawY() - mOriginalY) < 1) {
-                    if (mListener != null) {
-                        mListener.onClick(v);
-                    }
+                if (isMoved && isDrag) {
+                    //在拖动过按钮后，如果其他view刷新导致重绘，会让按钮重回原点，所以需要更改布局参数
+                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                    startAutoPull(v, lp);
+                }
+                //如果移动距离过小，则判定为点击 灵敏度可以设置
+                if (!isDrag
+                        || (Math.abs(event.getRawX() - mOriginalX) < sensitivity
+                        && Math.abs(event.getRawY() - mOriginalY) < sensitivity)) {
+                    if (mListener != null) mListener.onClick(v);
                 }
                 //消除警告
                 v.performClick();
@@ -104,7 +131,7 @@ public class OnDragTouchListener implements View.OnTouchListener {
     private void startAutoPull(final View v, final ViewGroup.MarginLayoutParams lp) {
         if (!hasAutoPullToBorder) {
             v.layout(left, top, right, bottom);
-            lp.setMargins(left, top, 0, 0);
+            lp.setMargins(0, 0, mScreenWidth - right, mScreenHeight - bottom - titleHeight - navHeight);
             v.setLayoutParams(lp);
             if (mListener != null) {
                 mListener.onDragged(v, left, top);
@@ -122,7 +149,7 @@ public class OnDragTouchListener implements View.OnTouchListener {
             left = (int) ((float) animation.getAnimatedValue());
             right = left + v.getWidth();
             v.layout(left, top, right, bottom);
-            lp.setMargins(left, top, 0, 0);
+            lp.setMargins(0, 0, mScreenWidth - right, mScreenHeight - bottom - titleHeight - navHeight);
             v.setLayoutParams(lp);
         });
         final float finalEnd = end;
@@ -148,11 +175,21 @@ public class OnDragTouchListener implements View.OnTouchListener {
     }
 
     public boolean isDrag() {
-        return isDrag;
+        return this.isDrag;
     }
 
-    public void setDrag(boolean drag) {
-        isDrag = drag;
+    public OnDragTouchListener setDrag(boolean drag) {
+        this.isDrag = drag;
+        return this;
+    }
+
+    public int getSensitivity() {
+        return sensitivity;
+    }
+
+    public OnDragTouchListener setSensitivity(int sensitivity) {
+        this.sensitivity = sensitivity;
+        return this;
     }
 
     public OnDraggableClickListener getOnDraggableClickListener() {
@@ -172,11 +209,11 @@ public class OnDragTouchListener implements View.OnTouchListener {
         /**
          * 当控件拖拽完后回调
          *
-         * @param v    拖拽控件
-         * @param left 控件左边距
-         * @param top  控件右边距
+         * @param v      拖拽控件
+         * @param right  控件右边距
+         * @param bottom 控件底边距
          */
-        void onDragged(View v, int left, int top);
+        void onDragged(View v, int right, int bottom);
 
         /**
          * 当可拖拽控件被点击时回调
@@ -186,7 +223,7 @@ public class OnDragTouchListener implements View.OnTouchListener {
         void onClick(View v);
 
         /**
-         * 拖拽前判断
+         * 拖拽前判断 是否跟进某个值拖拽
          */
         boolean onStartDrag();
     }
