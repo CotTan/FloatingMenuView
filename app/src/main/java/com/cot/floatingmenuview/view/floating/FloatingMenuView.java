@@ -48,8 +48,6 @@ public class FloatingMenuView extends FrameLayout {
     private FloatingMenuAdapter floatingAdapter;
     private List<String> labelList;//用来存按钮组中的文字
 
-    private boolean isDrag = true;//默认可拖拽
-
     //悬浮按钮
     private OnClickListener onClickListener;
     private OnLongClickListener onLongClickListener;
@@ -59,7 +57,18 @@ public class FloatingMenuView extends FrameLayout {
     //拖拽监听
     private OnDragTouchListener onDragTouchListener;
 
-    private int orientation = 1;//方向 1 、垂直方向 2、水平方向 3、发散（但未实现）
+    private boolean isDrag = true;//默认可拖拽
+
+    /**
+     * 方向
+     * 1、垂直方向
+     * 2、水平方向
+     * 3、发散（但未实现）
+     */
+    private int orientation = 1;
+
+
+    /****************************************** 以下为构造方法 ******************************************/
 
     public FloatingMenuView(@NonNull Context context) {
         this(context, null);
@@ -75,6 +84,9 @@ public class FloatingMenuView extends FrameLayout {
 
         initView();
     }
+
+
+    /****************************************** 以下为数据初始化相关 ******************************************/
 
     private void initView() {
         labelList = new ArrayList<>();
@@ -126,6 +138,9 @@ public class FloatingMenuView extends FrameLayout {
         setOnTouchListener(onDragTouchListener);
     }
 
+
+    /****************************************** 以下是数据源相关 ******************************************/
+
     /**
      * 设置数据源 或者通过add的方式也没问题
      *
@@ -136,6 +151,8 @@ public class FloatingMenuView extends FrameLayout {
         if (floatingMenuList == null) floatingMenuList = new ArrayList<>();
 
         for (FloatingMenuBean bean : floatingList) {
+            if (bean.getLabelName() == null) bean.setLabelName("");
+
             labelList.add(bean.getLabelName());
             //纯数字不换行
             if (!isNumeric(bean.getLabelName()) && orientation == 1)
@@ -147,61 +164,6 @@ public class FloatingMenuView extends FrameLayout {
             floatingAdapter.setList(floatingMenuList);
 
         return this;
-    }
-
-    /**
-     * 判断字符串是否为空
-     *
-     * @param s 要判断的字符串
-     * @return true:s为null或者为""; false:s有字符
-     */
-    private boolean isEmpty(String s) {
-        return s == null || s.length() <= 0;
-    }
-
-    /**
-     * 判断字符串是否是纯数字
-     */
-    public boolean isNumeric(String str) {
-        Pattern pattern = Pattern.compile("[0-9]*");
-        Matcher isNum = pattern.matcher(str);
-        return isNum.matches();
-    }
-
-    /**
-     * 过滤掉所有换行符，Tab等
-     *
-     * @param string 源字符串
-     * @return 过滤后的字符串
-     */
-    public static String trimString(String string) {
-        if (string != null) {
-            return string.trim()
-                    .replaceAll(" ", "")//去除字符串中所有的空格
-                    .replaceAll("\r", "")//去除字符串中所有的回车
-                    .replaceAll("\t", "")//去除字符串中所有的制表
-                    .replaceAll("\n", "");//去除字符串中所有的换行
-        } else {
-            return "";
-        }
-    }
-
-    /**
-     * 通过指定字符标记，将字符串换行
-     *
-     * @param str    原字符串，需要换行的字符串
-     * @param target 标记符号，用来换行
-     *               如果 target 为"",则所有字符串竖向排列
-     */
-    public String getReplaceWrap(String str, String target) {
-        if (!isEmpty(str)) {
-            String s = trimString(str).replace(target, "\n");//将目标字符串替换成换行
-            if (s.startsWith("\n")) s = s.substring(1);
-            if (s.endsWith("\n")) s = s.substring(0, s.length() - 1);
-
-            return s;
-        }
-        return "";
     }
 
     /**
@@ -248,7 +210,7 @@ public class FloatingMenuView extends FrameLayout {
     public FloatingMenuView adds(String... labels) {
         if (floatingMenuList == null) floatingMenuList = new ArrayList<>();
         for (String label : labels) {
-            if (!isEmpty(label)) {
+            if (label != null) {//也许需要为 "" 的字符串
                 //纯数字不换行
                 labelList.add(label);
                 if (!isNumeric(label) && orientation == 1) label = getReplaceWrap(label, "");
@@ -270,6 +232,9 @@ public class FloatingMenuView extends FrameLayout {
     public FloatingMenuView adds(int icon, String... labels) {
         return adds(new int[]{icon}).adds(labels);
     }
+
+
+    /****************************************** 以下是设置属性相关 ******************************************/
 
     /**
      * 设置按钮组 - 背景色
@@ -411,10 +376,17 @@ public class FloatingMenuView extends FrameLayout {
      * @param position 按钮组中所在的位置
      */
     public String getPositionName(int position) {
-        if (labelList != null)
-            return labelList.get(position);
+        if (labelList != null) return labelList.get(position);
 
         return "";
+    }
+
+    /**
+     * 获取按钮组中的文字集合
+     */
+    public List<String> getLabelList() {
+        if (labelList == null) labelList = new ArrayList<>();
+        return labelList;
     }
 
     /**
@@ -423,22 +395,23 @@ public class FloatingMenuView extends FrameLayout {
      * @param isHide true 隐藏
      */
     public FloatingMenuView setHideFloating(boolean isHide) {
-        if (isHide) {
+        if (isHide)
             views.setVisibility(GONE);
-        } else {
+        else
             views.setVisibility(VISIBLE);
-        }
+
         return this;
     }
 
     /**
      * 更换按钮组中图片
+     * 如果是从文字更换，则不支持
      *
      * @param resId    资源id
      * @param position 需要更换的位置
      */
     public FloatingMenuView setIcon(int resId, int position) {
-        if (floatingMenuList != null && position < floatingMenuList.size()) {
+        if (resId > 0 && floatingMenuList != null && position < floatingMenuList.size()) {
             floatingMenuList.get(position).setIcon(resId);
             floatingAdapter.notifyDataSetChanged();
         }
@@ -447,19 +420,14 @@ public class FloatingMenuView extends FrameLayout {
 
     /**
      * 更换按钮组文字
+     * 如果是从图片更换，则不支持
      *
      * @param resId    资源id
      * @param position 需要更换的位置
      */
     public FloatingMenuView setText(int resId, int position) {
-        if (floatingMenuList != null && position < floatingMenuList.size()) {
-            String str = mContext.getResources().getString(resId);
-            labelList.set(position, str);
-            if (!isNumeric(mContext.getResources().getString(resId)) && orientation == 1)
-                str = getReplaceWrap(str, "");
-            floatingMenuList.get(position).setLabelName(str);
-            floatingAdapter.notifyDataSetChanged();
-        }
+        if (resId > 0)
+            return setText(mContext.getResources().getString(resId), position);
         return this;
     }
 
@@ -577,6 +545,9 @@ public class FloatingMenuView extends FrameLayout {
         return this;
     }
 
+
+    /****************************************** 以下为监听器 ******************************************/
+
     /**
      * 设置监听 悬浮按钮 - 单击
      */
@@ -642,6 +613,64 @@ public class FloatingMenuView extends FrameLayout {
          * @return true 消费事件 false 传递到单击
          */
         boolean onItemLongClick(BaseQuickAdapter<?, ?> adapter, View view, int position);
+    }
+
+
+    /****************************************** 以下为工具方法 ******************************************/
+
+    /**
+     * 判断字符串是否为空
+     *
+     * @param s 要判断的字符串
+     * @return true:s为null或者为""; false:s有字符
+     */
+    private boolean isEmpty(String s) {
+        return s == null || s.length() <= 0;
+    }
+
+    /**
+     * 判断字符串是否是纯数字
+     */
+    public boolean isNumeric(String str) {
+        Pattern pattern = Pattern.compile("[0-9]*");
+        Matcher isNum = pattern.matcher(str);
+        return isNum.matches();
+    }
+
+    /**
+     * 过滤掉所有换行符，Tab等
+     *
+     * @param string 源字符串
+     * @return 过滤后的字符串
+     */
+    public String trimString(String string) {
+        if (string != null) {
+            return string.trim()
+                    .replaceAll(" ", "")//去除字符串中所有的空格
+                    .replaceAll("\r", "")//去除字符串中所有的回车
+                    .replaceAll("\t", "")//去除字符串中所有的制表
+                    .replaceAll("\n", "");//去除字符串中所有的换行
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * 通过指定字符标记，将字符串换行
+     *
+     * @param str    原字符串，需要换行的字符串
+     * @param target 标记符号，用来换行
+     *               如果 target 为"",则所有字符串竖向排列
+     */
+    public String getReplaceWrap(String str, String target) {
+        if (!isEmpty(str)) {
+            String s = trimString(str).replace(target, "\n");//将目标字符串替换成换行
+            if (s.startsWith("\n")) s = s.substring(1);
+            if (s.endsWith("\n")) s = s.substring(0, s.length() - 1);
+
+            return s;
+        }
+        return "";
     }
 
 }
