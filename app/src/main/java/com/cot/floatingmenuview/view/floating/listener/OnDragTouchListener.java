@@ -5,10 +5,13 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+
+import androidx.annotation.RequiresApi;
 
 import com.blankj.utilcode.util.BarUtils;
 import com.blankj.utilcode.util.ScreenUtils;
@@ -38,10 +41,12 @@ public class OnDragTouchListener implements View.OnTouchListener {
 
     private OnDraggableClickListener mListener;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public OnDragTouchListener(Context context) {
         this(context, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public OnDragTouchListener(Context context, boolean isAutoPullToBorder) {
         this.mContext = context;
         hasAutoPullToBorder = isAutoPullToBorder;
@@ -49,6 +54,7 @@ public class OnDragTouchListener implements View.OnTouchListener {
         init();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void init() {
         //虚拟按钮
         navHeight = GeneralUtils.getCurrentNavigationBarHeight((Activity) mContext);
