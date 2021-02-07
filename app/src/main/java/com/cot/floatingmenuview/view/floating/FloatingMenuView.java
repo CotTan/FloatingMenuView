@@ -545,6 +545,12 @@ public class FloatingMenuView extends FrameLayout {
         return this;
     }
 
+    /**
+     * 恢复初始位置
+     */
+    public void dismiss() {
+        setRotation(true);
+    }
 
     /****************************************** 以下为监听器 ******************************************/
 
