@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -25,6 +26,10 @@ import com.cot.floatingmenuview.view.floating.bean.CheckedBean;
 import com.cot.floatingmenuview.view.floating.bean.FloatingMenuBean;
 import com.cot.floatingmenuview.view.floating.listener.OnDragTouchListener;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -68,6 +73,16 @@ public class FloatingMenuView extends FrameLayout {
      * 3、发散（但未实现）
      */
     private int orientation = 1;
+
+    public static final int SELECT_ALL = 1;
+    public static final int SELECT_ALL_NOT = 2;
+    public static final int SELECT_REVERSE = 3;
+
+    @Retention(RetentionPolicy.SOURCE)//注解只保留在源文件，当Java文件编译成class文件的时候，注解被遗弃
+    @Target(ElementType.PARAMETER)////注解使用目标为形参
+    @IntDef({SELECT_ALL, SELECT_ALL_NOT, SELECT_REVERSE})
+    public @interface SelectType {
+    }
 
 
     /****************************************** 以下为构造方法 ******************************************/
@@ -357,17 +372,17 @@ public class FloatingMenuView extends FrameLayout {
      *              2 取消全选
      *              3 反选
      */
-    public FloatingMenuView setCheck(int check, List<? extends CheckedBean> list) {
+    public FloatingMenuView setCheck(@SelectType int check, List<? extends CheckedBean> list) {
         if (list != null) {
             for (CheckedBean bean : list) {
                 switch (check) {
-                    case 1://全选
+                    case SELECT_ALL://全选
                         bean.setChecked(true);
                         break;
-                    case 2://取消全选
+                    case SELECT_ALL_NOT://取消全选
                         bean.setChecked(false);
                         break;
-                    case 3://反选
+                    case SELECT_REVERSE://反选
                         bean.setChecked(!bean.isChecked());
                         break;
                 }
@@ -561,6 +576,7 @@ public class FloatingMenuView extends FrameLayout {
 
     /**
      * 是否开启自动依附边缘
+     *
      * @param isAdsorption true 自动吸附到边缘
      *                     false 移动在哪就在哪
      */
