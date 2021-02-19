@@ -62,6 +62,7 @@ public class OnDragTouchListener implements View.OnTouchListener {
         titleHeight = BarUtils.getNavBarHeight() + BarUtils.getStatusBarHeight();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onTouch(final View v, MotionEvent event) {
         //虚拟按钮

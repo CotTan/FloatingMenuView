@@ -1,6 +1,7 @@
 package com.cot.floatingmenuview.view.floating;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -70,14 +72,17 @@ public class FloatingMenuView extends FrameLayout {
 
     /****************************************** 以下为构造方法 ******************************************/
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public FloatingMenuView(@NonNull Context context) {
         this(context, null);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public FloatingMenuView(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public FloatingMenuView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.mContext = context;
@@ -88,6 +93,7 @@ public class FloatingMenuView extends FrameLayout {
 
     /****************************************** 以下为数据初始化相关 ******************************************/
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initView() {
         labelList = new ArrayList<>();
 
