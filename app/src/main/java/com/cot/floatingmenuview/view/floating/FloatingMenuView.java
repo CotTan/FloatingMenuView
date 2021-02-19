@@ -167,7 +167,7 @@ public class FloatingMenuView extends FrameLayout {
      *
      * @param floatingList 数据源
      */
-    public FloatingMenuView setDate(List<FloatingMenuBean> floatingList) {
+    public FloatingMenuView setData(List<FloatingMenuBean> floatingList) {
         if (floatingList == null) return this;
         if (floatingMenuList == null) floatingMenuList = new ArrayList<>();
 

@@ -21,6 +21,10 @@ import java.util.List;
 
 import butterknife.BindView;
 
+import static com.cot.floatingmenuview.view.floating.FloatingMenuView.SELECT_ALL;
+import static com.cot.floatingmenuview.view.floating.FloatingMenuView.SELECT_ALL_NOT;
+import static com.cot.floatingmenuview.view.floating.FloatingMenuView.SELECT_REVERSE;
+
 public class FloatingActivity extends BaseActivity {
 
     @BindView(R.id.rv_floating_student)
@@ -73,16 +77,19 @@ public class FloatingActivity extends BaseActivity {
         floatingList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_TEXT, "反选"));
         floatingList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_TEXT, "保存"));
 
+        /**
+         * 通过setData() 或 adds() 方法都可以 ，个人更喜欢第二种，如果是纯数字需转换成字符
+         */
         fmvFloating
-                .setDate(floatingList) //两种方式都行
+                .setData(floatingList) //两种方式都行
                 .add(R.drawable.icon_to_top)
                 .add("取消")
                 .adds(R.drawable.icon_back, R.drawable.icon_to_top)
-                .adds("测试", "制作")
-                .adds(R.drawable.icon_back, "讨论", "调查", "发现", "知乎", "百度")
+                .adds("吸附", "不吸附")
+                .adds(R.drawable.icon_back, "测试0", "测试1", "测试2")
                 .setTextColor(5, getResources().getColor(R.color.red))
                 .setTextSize(5, 18)
-                .setText("wow", 8)
+                .setText("隐藏", 11)
                 .setHasDividingLine(true)
                 .setDividingLineHeight(1)
                 .setMaxHeight(200)
@@ -106,15 +113,15 @@ public class FloatingActivity extends BaseActivity {
                             break;
                         case 1:
                             if (fmvFloating.getPositionName(position).equals("全选")) {
-                                fmvFloating.setCheck(1, studentList).setText("取消全选", position);
+                                fmvFloating.setCheck(SELECT_ALL, studentList).setText("取消全选", position);
                                 studentAdapter.notifyDataSetChanged();
                             } else if (fmvFloating.getPositionName(position).equals("取消全选")) {
-                                fmvFloating.setCheck(2, studentList).setText("全选", position);
+                                fmvFloating.setCheck(SELECT_ALL_NOT, studentList).setText("全选", position);
                                 studentAdapter.notifyDataSetChanged();
                             }
                             break;
                         case 2:
-                            fmvFloating.setCheck(3, studentList);
+                            fmvFloating.setCheck(SELECT_REVERSE, studentList);
                             studentAdapter.notifyDataSetChanged();
                             break;
                         case 3:
@@ -126,6 +133,12 @@ public class FloatingActivity extends BaseActivity {
                             ToastUtils.showShort("已选：" + count);
                             break;
                         case 8:
+                            fmvFloating.setAutoPullToBorder(true);
+                            break;
+                        case 9:
+                            fmvFloating.setAutoPullToBorder(false);
+                            break;
+                        case 11://隐藏
                             fmvFloating.setHideFloating(true);
                             break;
                         default:
@@ -137,7 +150,7 @@ public class FloatingActivity extends BaseActivity {
                 })
                 .setOnItemLongClickListener((adapter, view, position) -> {
                     ToastUtils.showShort("长按：" + fmvFloating.getFloatingList().get(position).getLabelName());
-                    if (position == 8) {
+                    if (position == 11) {
                         fmvFloating.setHideFloating(true);
                     }
                     fmvFloating.setRotation(true);
