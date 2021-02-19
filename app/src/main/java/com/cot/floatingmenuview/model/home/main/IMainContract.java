@@ -1,4 +1,4 @@
-package com.cot.floatingmenuview.model.home;
+package com.cot.floatingmenuview.model.home.main;
 
 import com.cot.floatingmenuview.base.BasePresenter;
 import com.cot.floatingmenuview.base.BaseView;

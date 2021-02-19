@@ -1,8 +1,9 @@
-package com.cot.floatingmenuview.model.home;
+package com.cot.floatingmenuview.model.home.floating;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,27 +21,28 @@ import java.util.List;
 
 import butterknife.BindView;
 
-public class MainActivity extends BaseActivity {
+public class FloatingActivity extends BaseActivity {
 
-    @BindView(R.id.rv_main_student)
-    RecyclerView rvMainStudent;
+    @BindView(R.id.rv_floating_student)
+    RecyclerView rvFloatingStudent;
     @BindView(R.id.fmv_floating)
     FloatingMenuView fmvFloating;
-    @BindView(R.id.cl_main)
-    ConstraintLayout clMain;
 
     private List<FloatingMenuBean> floatingList;
 
     private List<StudentBean> studentList;
     private StudentAdapter studentAdapter;
 
+    public static void loadActivity(Activity activity) {
+        activity.startActivity(new Intent(activity, FloatingActivity.class));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_floating);
 
         showToolBarTitle(getResources().getString(R.string.app_name));
-        setHideBackPressedIcon();
 
         studentList = new ArrayList<>();
         for (int i = 1; i <= 30; i++) {
@@ -51,9 +53,9 @@ public class MainActivity extends BaseActivity {
         }
 
         studentAdapter = new StudentAdapter(R.layout.item_student, studentList);
-        rvMainStudent.setLayoutManager(new GridLayoutManager(this, 1));
-        rvMainStudent.setAdapter(studentAdapter);
-        rvMainStudent.addItemDecoration(new RecycleViewGridDivider(32, 0,
+        rvFloatingStudent.setLayoutManager(new GridLayoutManager(this, 1));
+        rvFloatingStudent.setAdapter(studentAdapter);
+        rvFloatingStudent.addItemDecoration(new RecycleViewGridDivider(32, 0,
                 true, RecycleViewGridDivider.GRID));
 
         studentAdapter.setOnItemClickListener((adapter, view, position) -> {
@@ -85,6 +87,7 @@ public class MainActivity extends BaseActivity {
                 .setDividingLineHeight(1)
                 .setMaxHeight(200)
                 .setDrag(true)
+                .setAutoPullToBorder(true)
                 .setMargin(0, 10, 10, 20)
                 .setMenuBackground(R.drawable.shape_solid_bg_blue_10)
                 .setDividingLineColor(getResources().getColor(R.color.white))
@@ -99,7 +102,7 @@ public class MainActivity extends BaseActivity {
                     switch (position) {
                         case 0:
                         case 4:
-                            rvMainStudent.scrollToPosition(0);
+                            rvFloatingStudent.scrollToPosition(0);
                             break;
                         case 1:
                             if (fmvFloating.getPositionName(position).equals("全选")) {

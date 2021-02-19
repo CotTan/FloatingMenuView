@@ -21,14 +21,16 @@ import com.cot.floatingmenuview.utils.GeneralUtils;
  * 拖拽监听
  * //todo 依附功能虽然可以使用，但是需要优化，移动距离过小会 过动上移
  * 以右下角为参考坐标，参考链接为左上角
+ * 参考图 @look files｛res/mipmap/drag_view_position.png｝
  * 参考链接 @link｛https://blog.csdn.net/sl2018god/article/details/83109199｝
  */
 public class OnDragTouchListener implements View.OnTouchListener {
 
     private int mScreenWidth, mScreenHeight;//屏幕宽高
     private float mOriginalX, mOriginalY;//手指按下时的初始位置
-    private float mDistanceX, mDistanceY;//记录手指与view的右下角角的距离
-    private int left, top, right, bottom;
+    private float mDistanceX, mDistanceY;//记录手指与view的左上角的距离
+    private int left, top;//view 左上角位置
+    private int right, bottom;//view 离右下角的位置
     private int navHeight;//虚拟按钮高度
     private int titleHeight; //标题栏+状态栏
 
@@ -56,15 +58,14 @@ public class OnDragTouchListener implements View.OnTouchListener {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void init() {
-        //虚拟按钮
-        navHeight = GeneralUtils.getCurrentNavigationBarHeight((Activity) mContext);
-
         //标题栏+状态栏
         titleHeight = BarUtils.getNavBarHeight() + BarUtils.getStatusBarHeight();
     }
 
     @Override
     public boolean onTouch(final View v, MotionEvent event) {
+        //虚拟按钮
+        navHeight = GeneralUtils.getCurrentNavigationBarHeight((Activity) mContext);
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -75,52 +76,72 @@ public class OnDragTouchListener implements View.OnTouchListener {
                 mDistanceX = event.getRawX() - v.getLeft();
                 mDistanceY = event.getRawY() - v.getTop();
 
-                if (mListener != null) {
-                    isDrag = mListener.onStartDrag();
-                }
+                if (mListener != null) isDrag = mListener.onStartDrag();
+
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (!isDrag) {
-                    return false;
-                }
+                if (!isDrag) return false;
+
                 isMoved = true;
+
                 left = (int) (event.getRawX() - mDistanceX);
+                if (left < 0) left = 0;
                 top = (int) (event.getRawY() - mDistanceY);
-                right = left + v.getWidth();
-                bottom = top + v.getHeight();
+                if (top < 0) top = 0;
+
+                right = mScreenWidth - left - v.getWidth();
+                bottom = mScreenHeight - navHeight - top - v.getHeight();
+
                 if (left < 0) {
                     left = 0;
-                    right = left + v.getWidth();
+                    right = mScreenWidth - v.getWidth();
+                }
+                if (left > mScreenWidth - v.getWidth()) {
+                    left = mScreenWidth - v.getWidth();
+                    right = 0;
                 }
 
-                if (top < titleHeight) {
-                    top = titleHeight;
-                    bottom = top + v.getHeight();
+                if (top < 0) {
+                    top = 0;
+                    bottom = mScreenHeight - navHeight - top - v.getHeight();
+                }
+                if (top > mScreenHeight - navHeight - v.getHeight()) {
+                    top = mScreenHeight - navHeight - v.getHeight();
+                    bottom = 0;
                 }
 
-                if (right > mScreenWidth) {
-                    right = mScreenWidth;
-                    left = right - v.getWidth();
+                if (right < 0) {
+                    right = 0;
+                    left = mScreenWidth - v.getWidth();
+                }
+                if (right > mScreenWidth - v.getWidth()) {
+                    left = 0;
+                    right = mScreenWidth - v.getWidth();
                 }
 
-                if (bottom > mScreenHeight - navHeight) {
-                    bottom = mScreenHeight - navHeight;
-                    top = bottom - v.getHeight();
+                if (bottom > mScreenHeight - navHeight - v.getHeight()) {
+                    bottom = mScreenHeight - navHeight - v.getHeight();
+                    top = 0;
                 }
-                v.layout(left, top, right, bottom);
+                if (bottom < 0) {//navHeight 待测
+                    top = mScreenHeight - navHeight - v.getHeight();
+                    bottom = 0;
+                }
+
+                v.layout(left, top, left + v.getWidth(), top + v.getHeight());
                 break;
             case MotionEvent.ACTION_UP:
-                if (isMoved && isDrag) {
-                    //在拖动过按钮后，如果其他view刷新导致重绘，会让按钮重回原点，所以需要更改布局参数
-                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                    startAutoPull(v, lp);
-                }
                 //如果移动距离过小，则判定为点击 灵敏度可以设置
                 if (!isDrag
                         || (Math.abs(event.getRawX() - mOriginalX) < sensitivity
                         && Math.abs(event.getRawY() - mOriginalY) < sensitivity)) {
                     if (mListener != null) mListener.onClick(v);
+                } else if (isMoved && isDrag) {
+                    //在拖动过按钮后，如果其他view刷新导致重绘，会让按钮重回原点，所以需要更改布局参数
+                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                    startAutoPull(v, lp);
                 }
+
                 //消除警告
                 v.performClick();
                 break;
@@ -136,14 +157,15 @@ public class OnDragTouchListener implements View.OnTouchListener {
      */
     private void startAutoPull(final View v, final ViewGroup.MarginLayoutParams lp) {
         if (!hasAutoPullToBorder) {
-            v.layout(left, top, right, bottom);
-            lp.setMargins(0, 0, mScreenWidth - right, mScreenHeight - bottom - titleHeight - navHeight);
+            v.layout(left, top, left + v.getWidth(), top + v.getHeight());
+            lp.setMargins(0, 0, right, bottom - titleHeight);
             v.setLayoutParams(lp);
             if (mListener != null) {
-                mListener.onDragged(v, left, top);
+                mListener.onDragged(v, right, bottom - titleHeight);
             }
             return;
         }
+
         //当用户拖拽完后，让控件根据远近距离回到最近的边缘
         float end = 0;
         if ((left + v.getWidth() / 2) >= mScreenWidth / 2) {
@@ -153,17 +175,17 @@ public class OnDragTouchListener implements View.OnTouchListener {
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(animation -> {
             left = (int) ((float) animation.getAnimatedValue());
-            right = left + v.getWidth();
-            v.layout(left, top, right, bottom);
-            lp.setMargins(0, 0, mScreenWidth - right, mScreenHeight - bottom - titleHeight - navHeight);
+            right = mScreenWidth - left - v.getWidth();
+            v.layout(left, top, left + v.getWidth(), top + v.getHeight());
+            lp.setMargins(0, 0, right, bottom - titleHeight);
             v.setLayoutParams(lp);
         });
-        final float finalEnd = end;
+
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (mListener != null) {
-                    mListener.onDragged(v, (int) finalEnd, top);
+                    mListener.onDragged(v, right, bottom - titleHeight);
                 }
             }
         });

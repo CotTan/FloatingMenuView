@@ -536,12 +536,31 @@ public class FloatingMenuView extends FrameLayout {
         return floatingAdapter;
     }
 
+    /**
+     * 获取是否拖动状态
+     */
     public boolean isDrag() {
         return isDrag;
     }
 
+    /**
+     * 设置 拖动
+     *
+     * @param drag true 可拖拽 false 不可拖拽
+     */
     public FloatingMenuView setDrag(boolean drag) {
         isDrag = drag;
+        return this;
+    }
+
+    /**
+     * 是否开启自动依附边缘
+     * @param isAdsorption true 自动吸附到边缘
+     *                     false 移动在哪就在哪
+     */
+    public FloatingMenuView setAutoPullToBorder(boolean isAdsorption) {
+        if (onDragTouchListener != null)
+            onDragTouchListener.setHasAutoPullToBorder(isAdsorption);
         return this;
     }
 

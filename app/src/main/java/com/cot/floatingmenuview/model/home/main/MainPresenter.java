@@ -1,4 +1,4 @@
-package com.cot.floatingmenuview.model.home;
+package com.cot.floatingmenuview.model.home.main;
 
 public class MainPresenter {
 
