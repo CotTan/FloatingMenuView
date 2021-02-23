@@ -1,6 +1,16 @@
 package com.cot.floatingmenuview.view.floating.bean;
 
+import android.content.Context;
+
+import androidx.annotation.AnyRes;
+import androidx.annotation.IntDef;
+
 import com.chad.library.adapter.base.entity.MultiItemEntity;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author COT
@@ -12,8 +22,14 @@ public class FloatingMenuBean implements MultiItemEntity {
     public static final int VERTICAL_IMAGE = 0X101 << 2;//竖向图
     public static final int VERTICAL_TEXT = 0X102 << 2;//竖向文
 
+    @Retention(RetentionPolicy.SOURCE)//注解只保留在源文件，当Java文件编译成class文件的时候，注解被遗弃
+    @Target(ElementType.PARAMETER)////注解使用目标为形参
+    @IntDef({VERTICAL_IMAGE, VERTICAL_TEXT})
+    public @interface ItemType {
+    }
+
     private int itemType;//item 布局样式
-    private int icon;//图片
+    private int resId;//资源id
     private String labelName;//文字
 
     private float textSize;//字体大小
@@ -24,32 +40,35 @@ public class FloatingMenuBean implements MultiItemEntity {
     private int lineColor;//分割线颜色 默认白色
     private boolean hasLine;//是否需要分割线 默认false 不需要 true 需要
 
-    public FloatingMenuBean(int itemType, int icon) {
-        this(itemType, icon, "");
+    public FloatingMenuBean(Context context, @ItemType int itemType, @AnyRes int resId) {
+        this(itemType, resId,
+                itemType == VERTICAL_IMAGE ? String.valueOf(resId) : context.getResources().getString(resId));
     }
 
-    public FloatingMenuBean(int itemType, String labelName) {
-        this(itemType, 0, labelName);
+    @Deprecated //因Java的switch case 不能使用变量建议不用此方法输入
+    public FloatingMenuBean(String labelName) {
+        this(VERTICAL_TEXT, 0, labelName);
     }
 
-    public FloatingMenuBean(int itemType, int icon, String labelName) {
-        this(itemType, icon, labelName, false, false);
+    public FloatingMenuBean(@ItemType int itemType, @AnyRes int resId, String labelName) {
+        this(itemType, resId, labelName, false, false);
     }
 
-    public FloatingMenuBean(int itemType, int icon, String labelName, boolean isCheck, boolean hasLine) {
+    public FloatingMenuBean(@ItemType int itemType, @AnyRes int resId, String labelName, boolean isCheck, boolean hasLine) {
         this.itemType = itemType;
-        this.icon = icon;
+        this.resId = resId;
         this.labelName = labelName;
         this.isCheck = isCheck;
         this.hasLine = hasLine;
+
     }
 
-    public int getIcon() {
-        return icon;
+    public int getResId() {
+        return resId;
     }
 
-    public void setIcon(int icon) {
-        this.icon = icon;
+    public void setResId(int resId) {
+        this.resId = resId;
     }
 
     public String getLabelName() {
@@ -111,5 +130,9 @@ public class FloatingMenuBean implements MultiItemEntity {
     @Override
     public int getItemType() {
         return itemType;
+    }
+
+    public void setItemType(@ItemType int itemType) {
+        this.itemType = itemType;
     }
 }

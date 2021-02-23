@@ -46,8 +46,8 @@ public class FloatingMenuAdapter extends BaseMultiItemQuickAdapter<FloatingMenuB
         // 根据返回的 type 分别设置数据
         switch (helper.getItemViewType()) {
             case FloatingMenuBean.VERTICAL_IMAGE:
-                if (item.getIcon() != 0) {
-                    helper.setImageResource(R.id.iv_floating_menu_icon, item.getIcon());
+                if (item.getResId() != 0) {
+                    helper.setImageResource(R.id.iv_floating_menu_icon, item.getResId());
                     helper.getView(R.id.iv_floating_menu_icon).setVisibility(View.VISIBLE);
                 } else
                     helper.getView(R.id.iv_floating_menu_icon).setVisibility(View.GONE);
@@ -92,7 +92,7 @@ public class FloatingMenuAdapter extends BaseMultiItemQuickAdapter<FloatingMenuB
         if (backgroundColor == 0)
             view.setBackgroundColor(context.getResources().getColor(R.color.white));
         else
-            view.setBackgroundColor(backgroundColor);
+            view.setBackgroundColor(context.getResources().getColor(backgroundColor));
 
         return view;
     }

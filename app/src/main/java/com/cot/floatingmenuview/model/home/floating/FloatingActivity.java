@@ -24,6 +24,8 @@ import butterknife.BindView;
 import static com.cot.floatingmenuview.view.floating.FloatingMenuView.SELECT_ALL;
 import static com.cot.floatingmenuview.view.floating.FloatingMenuView.SELECT_ALL_NOT;
 import static com.cot.floatingmenuview.view.floating.FloatingMenuView.SELECT_REVERSE;
+import static com.cot.floatingmenuview.view.floating.bean.FloatingMenuBean.VERTICAL_IMAGE;
+import static com.cot.floatingmenuview.view.floating.bean.FloatingMenuBean.VERTICAL_TEXT;
 
 public class FloatingActivity extends BaseActivity {
 
@@ -72,24 +74,26 @@ public class FloatingActivity extends BaseActivity {
         });
 
         floatingList = new ArrayList<>();
-        floatingList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_IMAGE, R.drawable.icon_to_top));
-        floatingList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_TEXT, "全选"));
-        floatingList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_TEXT, "反选"));
-        floatingList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_TEXT, "保存"));
+        floatingList.add(new FloatingMenuBean(this, VERTICAL_IMAGE, R.drawable.icon_to_top));
+        floatingList.add(new FloatingMenuBean(this, VERTICAL_TEXT, R.string.select_all));
+        floatingList.add(new FloatingMenuBean(this, VERTICAL_TEXT, R.string.reverse_select));
+        floatingList.add(new FloatingMenuBean(this, VERTICAL_TEXT, R.string.save));
 
         /**
          * 通过setData() 或 adds() 方法都可以 ，个人更喜欢第二种，如果是纯数字需转换成字符
+         * 因Java的switch case 不能使用变量，建议不用过期方法
          */
         fmvFloating
-                .setData(floatingList) //两种方式都行
-                .add(R.drawable.icon_to_top)
-                .add("取消")
-                .adds(R.drawable.icon_back, R.drawable.icon_to_top)
+                .setData(floatingList)
+                .add(VERTICAL_IMAGE, R.drawable.icon_to_top)
+                .add(VERTICAL_TEXT, R.string.cancel)
+                .adds(VERTICAL_IMAGE, R.drawable.icon_back, R.drawable.icon_to_top)
                 .adds("吸附", "不吸附")
                 .adds(R.drawable.icon_back, "测试0", "测试1", "测试2")
+                .setText("置顶", 4)//此方法不支持resId获取
+                .setText("隐藏", 11)
                 .setTextColor(5, getResources().getColor(R.color.red))
                 .setTextSize(5, 18)
-                .setText("隐藏", 11)
                 .setHasDividingLine(true)
                 .setDividingLineHeight(1)
                 .setMaxHeight(200)
@@ -97,7 +101,7 @@ public class FloatingActivity extends BaseActivity {
                 .setAutoPullToBorder(true)
                 .setMargin(0, 10, 10, 20)
                 .setMenuBackground(R.drawable.shape_solid_bg_blue_10)
-                .setDividingLineColor(getResources().getColor(R.color.white))
+                .setDividingLineColor(R.color.white)
                 .setOnClickListener(() -> {
                     ToastUtils.showShort("单击 - 悬浮按钮");
                 })
@@ -106,55 +110,64 @@ public class FloatingActivity extends BaseActivity {
 //                    return false;
 //                })
                 .setOnItemClickListener((adapter, view, position) -> {
-                    switch (position) {
-                        case 0:
-                        case 4:
+                    //todo 由于 Java的switch case 不支持 变量表达式，建议使用if else 代替或者 position 或以下两种方式共用
+
+                    ToastUtils.showShort("单击：" +
+                            fmvFloating.getPositionName(position));
+                    fmvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
+                            .setTextSize(position, 16);
+
+                    /**
+                     * 如果使用过期方法则按此方式判断
+                     */
+                    switch (fmvFloating.getPositionName(position)) {
+                        case "置顶":
                             rvFloatingStudent.scrollToPosition(0);
                             break;
-                        case 1:
-                            if (fmvFloating.getPositionName(position).equals("全选")) {
-                                fmvFloating.setCheck(SELECT_ALL, studentList).setText("取消全选", position);
-                                studentAdapter.notifyDataSetChanged();
-                            } else if (fmvFloating.getPositionName(position).equals("取消全选")) {
-                                fmvFloating.setCheck(SELECT_ALL_NOT, studentList).setText("全选", position);
-                                studentAdapter.notifyDataSetChanged();
-                            }
+                        case "吸附":
+                            fmvFloating.setAutoPullToBorder(true);
                             break;
-                        case 2:
+                        case "不吸附":
+                            fmvFloating.setAutoPullToBorder(false);
+                            break;
+                        case "隐藏"://隐藏
+                            fmvFloating.setHideFloating(true);
+                            break;
+                    }
+
+                    switch (fmvFloating.getPositionResId(position)) {
+                        case R.drawable.icon_to_top:
+                            rvFloatingStudent.scrollToPosition(0);
+                            break;
+                        case R.string.select_all:
+                            fmvFloating.setCheck(SELECT_ALL, studentList)
+                                    .setText(R.string.unselect_all, position);
+                            studentAdapter.notifyDataSetChanged();
+                            break;
+                        case R.string.unselect_all:
+                            fmvFloating.setCheck(SELECT_ALL_NOT, studentList)
+                                    .setText(R.string.select_all, position);
+                            studentAdapter.notifyDataSetChanged();
+                            break;
+                        case R.string.reverse_select:
                             fmvFloating.setCheck(SELECT_REVERSE, studentList);
                             studentAdapter.notifyDataSetChanged();
                             break;
-                        case 3:
+                        case R.string.save:
                             int count = 0;
-                            for (StudentBean bean : studentList) {
-                                if (bean.isChecked())
-                                    count++;
-                            }
+                            for (StudentBean bean : studentList)
+                                if (bean.isChecked()) count++;
                             ToastUtils.showShort("已选：" + count);
-                            break;
-                        case 8:
-                            fmvFloating.setAutoPullToBorder(true);
-                            break;
-                        case 9:
-                            fmvFloating.setAutoPullToBorder(false);
-                            break;
-                        case 11://隐藏
-                            fmvFloating.setHideFloating(true);
-                            break;
-                        default:
-                            ToastUtils.showShort("单击：" + fmvFloating.getFloatingList().get(position).getLabelName());
-                            fmvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
-                                    .setTextSize(position, 16);
                             break;
                     }
                 })
                 .setOnItemLongClickListener((adapter, view, position) -> {
                     ToastUtils.showShort("长按：" + fmvFloating.getFloatingList().get(position).getLabelName());
-                    if (position == 11) {
+                    if (fmvFloating.getPositionName(position).equals("隐藏")) {
                         fmvFloating.setHideFloating(true);
                     }
-                    fmvFloating.setRotation(true);
-                    fmvFloating.setTextColor(position, getResources().getColor(R.color.yellow))
+                    fmvFloating.dismiss()
+                            .setTextColor(position, getResources().getColor(R.color.yellow))
                             .setTextSize(position, 18);
                     return true;
                 });

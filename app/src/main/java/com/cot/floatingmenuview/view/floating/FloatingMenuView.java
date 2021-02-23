@@ -8,11 +8,15 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.AnyRes;
 import androidx.annotation.ColorInt;
-import androidx.annotation.IntDef;
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.StringDef;
+import androidx.annotation.StringRes;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,6 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.cot.floatingmenuview.view.floating.bean.FloatingMenuBean.VERTICAL_IMAGE;
+import static com.cot.floatingmenuview.view.floating.bean.FloatingMenuBean.VERTICAL_TEXT;
 
 /**
  * @author COT
@@ -74,13 +81,13 @@ public class FloatingMenuView extends FrameLayout {
      */
     private int orientation = 1;
 
-    public static final int SELECT_ALL = 1;
-    public static final int SELECT_ALL_NOT = 2;
-    public static final int SELECT_REVERSE = 3;
+    public static final String SELECT_ALL = "1";
+    public static final String SELECT_ALL_NOT = "2";
+    public static final String SELECT_REVERSE = "3";
 
     @Retention(RetentionPolicy.SOURCE)//注解只保留在源文件，当Java文件编译成class文件的时候，注解被遗弃
     @Target(ElementType.PARAMETER)////注解使用目标为形参
-    @IntDef({SELECT_ALL, SELECT_ALL_NOT, SELECT_REVERSE})
+    @StringDef({SELECT_ALL, SELECT_ALL_NOT, SELECT_REVERSE})
     public @interface SelectType {
     }
 
@@ -190,24 +197,22 @@ public class FloatingMenuView extends FrameLayout {
     /**
      * 添加数据源
      *
-     * @param icon res 的图片资源
+     * @param resId res 的id资源
      */
-    public FloatingMenuView add(int icon) {
-        return adds(new int[]{icon});
+    public FloatingMenuView add(@FloatingMenuBean.ItemType int itemType, int resId) {
+        return adds(itemType, resId);
     }
 
     /**
      * 添加数据源
      *
-     * @param icons res 的图片资源
+     * @param resIds res 的图片资源
      */
-    public FloatingMenuView adds(int... icons) {
+    public FloatingMenuView adds(@FloatingMenuBean.ItemType int itemType, int... resIds) {
         if (floatingMenuList == null) floatingMenuList = new ArrayList<>();
-        for (int icon : icons) {
-            if (icon > 0) {
-                labelList.add("");
-                floatingMenuList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_IMAGE, icon));
-            }
+        for (int resId : resIds) {
+            labelList.add(String.valueOf(resId));
+            floatingMenuList.add(new FloatingMenuBean(mContext, itemType, resId));
         }
         if (floatingAdapter != null)
             floatingAdapter.setList(this.floatingMenuList);
@@ -219,6 +224,7 @@ public class FloatingMenuView extends FrameLayout {
      *
      * @param label 按钮名称
      */
+    @Deprecated //因Java的switch case 不能使用变量建议不用此方法输入
     public FloatingMenuView add(String label) {
         return adds(label);
     }
@@ -228,6 +234,7 @@ public class FloatingMenuView extends FrameLayout {
      *
      * @param labels 按钮名称
      */
+    @Deprecated //因Java的switch case 不能使用变量建议不用此方法输入
     public FloatingMenuView adds(String... labels) {
         if (floatingMenuList == null) floatingMenuList = new ArrayList<>();
         for (String label : labels) {
@@ -236,7 +243,7 @@ public class FloatingMenuView extends FrameLayout {
                 labelList.add(label);
                 if (!isNumeric(label) && orientation == 1) label = getReplaceWrap(label, "");
 
-                floatingMenuList.add(new FloatingMenuBean(FloatingMenuBean.VERTICAL_TEXT, label));
+                floatingMenuList.add(new FloatingMenuBean(label));
             }
         }
         if (floatingAdapter != null)
@@ -250,8 +257,9 @@ public class FloatingMenuView extends FrameLayout {
      * @param icon   图标
      * @param labels 文字
      */
+    @Deprecated //因Java的switch case 不能使用变量建议不用此方法输入
     public FloatingMenuView adds(int icon, String... labels) {
-        return adds(new int[]{icon}).adds(labels);
+        return adds(VERTICAL_IMAGE, icon).adds(labels);
     }
 
 
@@ -260,16 +268,16 @@ public class FloatingMenuView extends FrameLayout {
     /**
      * 设置按钮组 - 背景色
      */
-    public FloatingMenuView setMenuBackground(int resId) {
-        if (resId > 0) mRecyclerView.setBackgroundResource(resId);
+    public FloatingMenuView setMenuBackground(@AnyRes int resId) {
+        mRecyclerView.setBackgroundResource(resId);
         return this;
     }
 
     /**
      * 设置悬浮按钮 - 背景色
      */
-    public FloatingMenuView setFloatBackground(int resId) {
-        if (resId > 0) mIvFloating.setBackgroundResource(resId);
+    public FloatingMenuView setFloatBackground(@AnyRes int resId) {
+        mIvFloating.setBackgroundResource(resId);
         return this;
     }
 
@@ -277,8 +285,8 @@ public class FloatingMenuView extends FrameLayout {
      * 设置悬浮按钮 - icon
      * 默认 “+”图片
      */
-    public FloatingMenuView setFloatIcon(int resId) {
-        if (resId > 0) mIvFloating.setImageResource(resId);
+    public FloatingMenuView setFloatIcon(@AnyRes int resId) {
+        mIvFloating.setImageResource(resId);
         return this;
     }
 
@@ -372,7 +380,7 @@ public class FloatingMenuView extends FrameLayout {
      *              2 取消全选
      *              3 反选
      */
-    public FloatingMenuView setCheck(@SelectType int check, List<? extends CheckedBean> list) {
+    public FloatingMenuView setCheck(@SelectType String check, List<? extends CheckedBean> list) {
         if (list != null) {
             for (CheckedBean bean : list) {
                 switch (check) {
@@ -392,14 +400,34 @@ public class FloatingMenuView extends FrameLayout {
     }
 
     /**
-     * 获取按钮组中的文字
+     * 获取按钮组中的文字,如果是图标资源 默认是它的id 可以修改
      *
      * @param position 按钮组中所在的位置
      */
     public String getPositionName(int position) {
-        if (labelList != null) return labelList.get(position);
+        if (labelList == null) return "";
+        else return labelList.get(position);
+    }
 
-        return "";
+    /**
+     * 更换按钮组中的文字,如果是图标资源 默认是它的id 可以修改
+     *
+     * @param position 按钮组中所在的位置
+     * @param label    按钮没竖向排布的文字
+     */
+    public FloatingMenuView setPositionName(int position, String label) {
+        if (labelList != null)
+            labelList.set(position, label);
+        return this;
+    }
+
+    /**
+     * 获取按钮组中的文字或图标的id
+     *
+     * @param position 按钮组中所在的位置
+     */
+    public int getPositionResId(int position) {
+        return floatingMenuList.get(position).getResId();
     }
 
     /**
@@ -431,9 +459,10 @@ public class FloatingMenuView extends FrameLayout {
      * @param resId    资源id
      * @param position 需要更换的位置
      */
-    public FloatingMenuView setIcon(int resId, int position) {
-        if (resId > 0 && floatingMenuList != null && position < floatingMenuList.size()) {
-            floatingMenuList.get(position).setIcon(resId);
+    public FloatingMenuView setIcon(@DrawableRes int resId, int position) {
+        if (floatingMenuList != null && position < floatingMenuList.size()) {
+            floatingMenuList.get(position).setItemType(VERTICAL_IMAGE);
+            floatingMenuList.get(position).setResId(resId);
             floatingAdapter.notifyDataSetChanged();
         }
         return this;
@@ -441,25 +470,29 @@ public class FloatingMenuView extends FrameLayout {
 
     /**
      * 更换按钮组文字
-     * 如果是从图片更换，则不支持
      *
      * @param resId    资源id
      * @param position 需要更换的位置
      */
-    public FloatingMenuView setText(int resId, int position) {
-        if (resId > 0)
-            return setText(mContext.getResources().getString(resId), position);
-        return this;
+    public FloatingMenuView setText(@StringRes int resId, int position) {
+        if (floatingMenuList != null && position < floatingMenuList.size()) {
+            floatingMenuList.get(position).setItemType(VERTICAL_TEXT);
+            floatingMenuList.get(position).setResId(resId);
+            floatingAdapter.notifyDataSetChanged();
+        }
+        return setText(mContext.getResources().getString(resId), position);
     }
 
     /**
-     * 更换按钮组文字
+     * 更换按钮组文字,此方法不支持 resId 获取
      *
      * @param position 需要更换的位置
      */
+    @Deprecated //因Java的switch case 不能使用变量建议不用此方法输入
     public FloatingMenuView setText(String str, int position) {
         if (floatingMenuList != null && position < floatingMenuList.size()) {
-            labelList.set(position, str);
+            setPositionName(position, str);
+
             if (!isNumeric(str) && orientation == 1) str = getReplaceWrap(str, "");
             floatingMenuList.get(position).setLabelName(str);
             floatingAdapter.notifyDataSetChanged();
@@ -517,7 +550,7 @@ public class FloatingMenuView extends FrameLayout {
      *
      * @param resColor color 资源
      */
-    public FloatingMenuView setDividingLineColor(int resColor) {
+    public FloatingMenuView setDividingLineColor(@ColorRes int resColor) {
         if (floatingMenuList != null) {
             for (FloatingMenuBean bean : floatingMenuList) {
                 bean.setLineColor(resColor);
@@ -558,7 +591,7 @@ public class FloatingMenuView extends FrameLayout {
     }
 
     /**
-     * 获取是否拖动状态
+     * 获取是否可拖动
      */
     public boolean isDrag() {
         return isDrag;
@@ -589,8 +622,8 @@ public class FloatingMenuView extends FrameLayout {
     /**
      * 恢复初始位置
      */
-    public void dismiss() {
-        setRotation(true);
+    public FloatingMenuView dismiss() {
+        return setRotation(true);
     }
 
     /****************************************** 以下为监听器 ******************************************/
