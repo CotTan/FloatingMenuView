@@ -135,6 +135,9 @@ public class FloatingActivity extends BaseActivity {
                             break;
                     }
 
+                    /**
+                     * 正常方法，判断
+                     */
                     switch (fmvFloating.getPositionResId(position)) {
                         case R.drawable.icon_to_top:
                             rvFloatingStudent.scrollToPosition(0);

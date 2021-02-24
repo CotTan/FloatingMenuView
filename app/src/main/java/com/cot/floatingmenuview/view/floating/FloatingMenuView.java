@@ -211,8 +211,11 @@ public class FloatingMenuView extends FrameLayout {
     public FloatingMenuView adds(@FloatingMenuBean.ItemType int itemType, int... resIds) {
         if (floatingMenuList == null) floatingMenuList = new ArrayList<>();
         for (int resId : resIds) {
-            labelList.add(String.valueOf(resId));
-            floatingMenuList.add(new FloatingMenuBean(mContext, itemType, resId));
+            FloatingMenuBean bean = new FloatingMenuBean(mContext, itemType, resId);
+            labelList.add(bean.getLabelName());
+            if (!isNumeric(bean.getLabelName()) && orientation == 1)
+                bean.setLabelName(getReplaceWrap(bean.getLabelName(), ""));
+            floatingMenuList.add(bean);
         }
         if (floatingAdapter != null)
             floatingAdapter.setList(this.floatingMenuList);
