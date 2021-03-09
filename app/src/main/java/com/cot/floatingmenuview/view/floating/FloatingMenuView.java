@@ -296,10 +296,10 @@ public class FloatingMenuView extends FrameLayout {
     /**
      * 设置离边距
      *
-     * @param left   默认值 10dp;
-     * @param top    默认值 10dp;
-     * @param right  默认值 10dp;
-     * @param bottom 默认值 100dp;
+     * @param left   默认值 0dp;
+     * @param top    默认值 0dp;
+     * @param right  默认值 0dp;
+     * @param bottom 默认值 0dp;
      */
     public FloatingMenuView setMargin(int left, int top, int right, int bottom) {
         //-6 是因为image占了6dp
@@ -308,15 +308,16 @@ public class FloatingMenuView extends FrameLayout {
         if (right >= 6) right -= 6;
         if (bottom >= 6) bottom -= 6;
 
-        LayoutParams lp =
-                (LayoutParams) mLayout.getLayoutParams();
+        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) getLayoutParams();
+
+        if (lp == null) return this;
 
         lp.leftMargin = ConvertUtils.dp2px(left);
         lp.topMargin = ConvertUtils.dp2px(top);
         lp.rightMargin = ConvertUtils.dp2px(right);
         lp.bottomMargin = ConvertUtils.dp2px(bottom);
 
-        mLayout.setLayoutParams(lp);
+        setLayoutParams(lp);
         return this;
     }
 

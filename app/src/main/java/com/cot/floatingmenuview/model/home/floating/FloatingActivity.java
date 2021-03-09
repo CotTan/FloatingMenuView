@@ -99,7 +99,7 @@ public class FloatingActivity extends BaseActivity {
                 .setMaxHeight(200)
                 .setDrag(true)
                 .setAutoPullToBorder(true)
-                .setMargin(0, 10, 10, 20)
+                .setMargin(0, 10, 10, 90)
                 .setMenuBackground(R.drawable.shape_solid_bg_blue_10)
                 .setDividingLineColor(R.color.white)
                 .setOnClickListener(() -> {
